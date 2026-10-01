@@ -408,6 +408,11 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
 .rv { transition: transform .9s cubic-bezier(.2,.7,.2,1), opacity .9s ease; }
 .rv.pre { transform: translateY(34px); opacity: .45; }
 
+/* phones: give the big headlines 1.5 line spacing */
+@media (max-width: 640px) {
+  .hero h1, .sec-head h2, .closer h2 { line-height: 1.5; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .rv.pre { transform: none; opacity: 1; }
