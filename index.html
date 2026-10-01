@@ -526,7 +526,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     </div>
     <div style="display:flex;gap:18px;flex-wrap:wrap"><span class="key"><i class="s"></i>Lesser-known</span><span class="key"><i class="b"></i>Big</span></div>
     <div class="chart" id="f2-chart"></div>
-    <p class="note" id="hear-note">Each listener plays two notes: lesser-known, then big. Pitch follows the stick rate, and every 10 points is one octave. The melody rises for all 10 listeners.</p>
+    <p class="note" id="hear-note">A club track made from the data. Each listener gets one bar: the stabs are their lesser-known stick rate, and the lead bends up into their big-artist rate. Higher stick rate, higher note. Notes snap to a minor scale, so L06's tiny 0.6-point gap sounds level. The other nine all climb.</p>
   </div>
   <div class="figs rv">
     <div class="fig"><span class="n">12<small>%</small> <small>vs</small> 19<small>%</small></span><p>Lesser-known vs big artists that stuck, all plays pooled</p></div>
@@ -901,26 +901,95 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   let f2groups = [];
   function drawF2() { f2groups = dumbbell(document.getElementById('f2-chart'), f2rows, 30, { gapLabel: true, label: 'Stick rate by listener' }); }
 
-  let actx = null, playing = false;
-  function note(freq, t, dur, type) {
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = type; o.frequency.value = freq;
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.18, t + .02); g.gain.exponentialRampToValueAtTime(.001, t + dur);
-    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .05);
+  // ---------- "Hear the gap": the stick data as a hyperpop club track ----------
+  // One bar per listener. Lesser-known stick rate = the stabs, big-artist rate = the note
+  // the lead bends up into. Pitch climbs 1 scale step per ~1.4 pts, snapped to A minor.
+  let actx = null, playing = false, bus = null, noiseBuf = null, timers = [];
+  const BPM = 130, S16 = 60 / BPM / 4, BAR = S16 * 16;
+  const MINOR = [0, 2, 3, 5, 7, 8, 10];
+  const leadHz = p => { const d = Math.round(p * 0.7), semis = Math.floor(d / 7) * 12 + MINOR[d % 7]; return 220 * Math.pow(2, semis / 12); };
+  const ROOTS = [0, 8, 3, 10].map(x => 55 * Math.pow(2, x / 12)); // A, F, C, G
+  function curve(k) { const n = 1024, c = new Float32Array(n); for (let i = 0; i < n; i++) { const x = i * 2 / n - 1; c[i] = (1 + k) * x / (1 + k * Math.abs(x)); } return c; }
+  function makeBus() {
+    const shaper = actx.createWaveShaper(); shaper.curve = curve(5); shaper.oversample = '4x';
+    const comp = actx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 8; comp.attack.value = .003; comp.release.value = .12;
+    const out = actx.createGain(); out.gain.value = .55;
+    shaper.connect(comp).connect(out).connect(actx.destination);
+    const synths = actx.createGain(); synths.connect(shaper);   // ducked by the kick
+    const drums = actx.createGain(); drums.connect(shaper);
+    return { out, synths, drums };
   }
-  const pitch = p => 196 * Math.pow(2, p / 10);
-  const hearBtn = document.getElementById('hear');
-  function hear() {
-    if (playing) return;
-    try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch (e) { document.getElementById('hear-note').textContent = 'Sound is not available in this browser.'; return; }
-    playing = true; hearBtn.querySelector('span').textContent = 'Playing…';
-    const t0 = actx.currentTime + .1, step = .62;
-    f2rows.forEach((r, i) => {
-      note(pitch(r.a), t0 + i * step, .5, 'triangle');
-      note(pitch(r.b), t0 + i * step + .26, .6, 'sine');
-      setTimeout(() => { f2groups.forEach(g => g.classList.remove('on')); f2groups[i].classList.add('on'); eq(i); }, (i * step + .1) * 1000);
+  function noise(t, dur, type, freq, gain) {
+    const src = actx.createBufferSource(); src.buffer = noiseBuf;
+    const f = actx.createBiquadFilter(); f.type = type; f.frequency.value = freq;
+    const g = actx.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+    src.connect(f).connect(g).connect(bus.drums); src.start(t); src.stop(t + dur + .02);
+  }
+  function kick(t) {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(42, t + .13);
+    g.gain.setValueAtTime(1.1, t); g.gain.exponentialRampToValueAtTime(.001, t + .38);
+    o.connect(g).connect(bus.drums); o.start(t); o.stop(t + .4);
+    // sidechain pump on the synths
+    bus.synths.gain.setValueAtTime(.18, t); bus.synths.gain.linearRampToValueAtTime(1, t + S16 * 3);
+  }
+  function clap(t) { [0, .011, .022].forEach(d => noise(t + d, d === .022 ? .18 : .03, 'bandpass', 1600, .7)); }
+  function hat(t, open) { noise(t, open ? .14 : .035, 'highpass', 8000, open ? .22 : .12); }
+  function supersaw(hz, t, dur, gain, fromHz) {
+    const f = actx.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = 6;
+    f.frequency.setValueAtTime(5200, t); f.frequency.exponentialRampToValueAtTime(1400, t + dur);
+    const g = actx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + .006); g.gain.setTargetAtTime(gain * .55, t + .03, .08); g.gain.linearRampToValueAtTime(0, t + dur);
+    f.connect(g).connect(bus.synths);
+    [-14, -5, 0, 6, 15].forEach(det => {
+      const o = actx.createOscillator(); o.type = det === 0 ? 'square' : 'sawtooth'; o.detune.value = det;
+      if (fromHz) { o.frequency.setValueAtTime(fromHz, t); o.frequency.exponentialRampToValueAtTime(hz, t + .09); } else o.frequency.value = hz;
+      o.connect(f); o.start(t); o.stop(t + dur + .02);
     });
-    setTimeout(() => { f2groups.forEach(g => g.classList.remove('on')); eq(null); playing = false; hearBtn.querySelector('span').textContent = 'Hear it again'; }, (f2rows.length * step + .7) * 1000);
+  }
+  function bass(hz, t, dur) {
+    const f = actx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(900, t); f.frequency.exponentialRampToValueAtTime(220, t + dur);
+    const g = actx.createGain(); g.gain.setValueAtTime(.32, t); g.gain.linearRampToValueAtTime(0, t + dur);
+    const o = actx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = hz;
+    const sub = actx.createOscillator(); sub.frequency.value = hz;
+    o.connect(f); sub.connect(f); f.connect(g).connect(bus.synths); o.start(t); sub.start(t); o.stop(t + dur + .02); sub.stop(t + dur + .02);
+  }
+  function drumsBar(t, full) {
+    for (let k = 0; k < 16; k++) {
+      const tk = t + k * S16;
+      if (k % 4 === 0) kick(tk);
+      if (full && (k === 4 || k === 12)) clap(tk);
+      if (k % 4 === 2) hat(tk, true); else if (full && k % 2 === 1) hat(tk, false);
+    }
+    if (full) noise(t + 15 * S16, S16, 'bandpass', 3000, .4); // little fill
+  }
+  function bassBar(t, root) { [0, 2, 3, 6, 8, 10, 11, 14].forEach(k => bass(k === 2 || k === 10 ? root * 2 : root, t + k * S16, S16 * .9)); }
+  const hearBtn = document.getElementById('hear'), hearLabel = hearBtn.querySelector('span');
+  function stopTrack() {
+    timers.forEach(clearTimeout); timers = [];
+    if (bus) { const b = bus; b.out.gain.setTargetAtTime(0, actx.currentTime, .04); setTimeout(() => b.out.disconnect(), 400); bus = null; }
+    f2groups.forEach(g => g.classList.remove('on')); eq(null); playing = false; hearLabel.textContent = 'Hear it again';
+  }
+  function hear() {
+    if (playing) { stopTrack(); return; }
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume();
+      if (!noiseBuf) { noiseBuf = actx.createBuffer(1, actx.sampleRate, actx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    } catch (e) { document.getElementById('hear-note').textContent = 'Sound is not available in this browser.'; return; }
+    if (ctrl && playingNow) ctrl.pause();
+    bus = makeBus(); playing = true; hearLabel.textContent = 'Stop';
+    const t0 = actx.currentTime + .12;
+    drumsBar(t0, false); bassBar(t0, ROOTS[0]);                     // intro bar: kick, hats, bass
+    f2rows.forEach((r, i) => {
+      const t = t0 + (i + 1) * BAR, lo = leadHz(r.a), hi = leadHz(r.b);
+      drumsBar(t, true); bassBar(t, ROOTS[i % 4]);
+      [0, 3, 6].forEach(k => supersaw(lo, t + k * S16, S16 * 1.6, .16));   // lesser-known stabs
+      supersaw(hi, t + 8 * S16, S16 * 2.6, .2, lo);                       // bend up into the big-artist note
+      [11, 14].forEach(k => supersaw(hi, t + k * S16, S16 * 1.4, .16));
+      timers.push(setTimeout(() => { f2groups.forEach(g => g.classList.remove('on')); f2groups[i].classList.add('on'); eq(i); }, (t - actx.currentTime) * 1000));
+    });
+    const tEnd = t0 + (f2rows.length + 1) * BAR;
+    kick(tEnd); supersaw(leadHz(f2rows[f2rows.length - 1].b), tEnd, BAR * .75, .2);   // last word: the biggest gap
+    timers.push(setTimeout(stopTrack, (tEnd - actx.currentTime + BAR * .8) * 1000));
   }
   hearBtn.onclick = hear;
 
