@@ -91,6 +91,7 @@ p { margin: 0; }
 .screen { position: relative; height: 100%; border-radius: 39px; overflow: hidden; background: linear-gradient(170deg, #2433D8 0%, #1A1B5E 38%, #0A0A12 70%); display: grid; grid-template-rows: auto auto 1fr auto; padding: 16px 20px 22px; gap: 12px; text-align: left; }
 .status { display: flex; justify-content: space-between; font: 600 13px var(--body); color: #fff; padding-inline: 8px; }
 .island { position: absolute; top: 12px; left: 50%; width: 92px; height: 26px; margin-left: -46px; background: #000; border-radius: 20px; }
+.screen .bar-t .full { font-size: 12px; color: #fff; text-decoration: none; padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,.14); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); }
 .screen .bar-t { display: flex; justify-content: space-between; align-items: center; color: #fff; font-size: 13.5px; opacity: .9; }
 .vinyl { align-self: center; justify-self: center; width: 200px; height: 200px; border-radius: 50%; position: relative;
   background: repeating-radial-gradient(circle, #0c0c10 0 2px, #16161c 2px 4px); box-shadow: 0 20px 50px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
@@ -407,7 +408,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
       <div class="screen">
         <span class="island" aria-hidden="true"></span>
         <div class="status"><span>9:41</span><span class="mono" style="font-size:11px">●●● ▮</span></div>
-        <div class="bar-t"><span>⌄</span><span>Radio</span><span>♡</span></div>
+        <div class="bar-t"><span>⌄</span><span>Radio</span><a class="full" id="np-open" href="https://open.spotify.com/track/3USDaKxyFcwD6ehOYowW2j" target="_blank" rel="noopener">Full song ↗</a></div>
         <div class="vinyl" aria-hidden="true"></div>
         <div class="np">
           <span class="pill" id="pill">First listen · lean-back</span>
@@ -433,7 +434,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   </div>
   <div class="listen" id="listen">
     <div class="embed" id="embed"><p class="fallback">Loading the Spotify player…</p></div>
-    <p class="credit"><span id="credit-now"></span> A 5-song queue: two of Ena's picks and three lesser-known artists from the sample. Skip one in under 30 seconds and the phone marks it, the same way this study counts a skip. Through Spotify's own player; logged-out visitors hear a 30-second preview.</p>
+    <p class="credit"><span id="credit-now"></span> A 5-song queue: two of Ena's picks and three lesser-known artists from the sample. Skip one in under 30 seconds and the phone marks it, the same way this study counts a skip. Through Spotify's own player. Logged-out visitors, and most phones, hear a preview: tap <b>Full song ↗</b> on the phone to play the whole track in Spotify.</p>
   </div>
 </header>
 
@@ -1013,7 +1014,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     { id: '611y0fYELYaLtjiMKbxO4N', t: 'Folake', a: 'taves', cover: CDN + '678ee91c94decd399d65d8b6', note: 'Lesser-known, from the sample' },
     { id: '3GKP5FZ3p29o082QOwIEiu', t: 'Cameras', a: 'SuperJazzClub', cover: CDN + '717be9c8c3f0ded5635cc597', note: 'Lesser-known, from the sample' }
   ];
-  let qi = 0, lastPos = 0, started = false, playingNow = false, pendingPlay = false;
+  let qi = 0, lastPos = 0, started = false, playingNow = false;
   const npT = document.getElementById('np-t'), npA = document.getElementById('np-a'), npQ = document.getElementById('np-q');
   const pill = document.getElementById('pill'), creditNow = document.getElementById('credit-now'), vinyl = document.querySelector('.vinyl');
   const trackUrl = () => 'https://open.spotify.com/track/' + QUEUE[qi].id;
@@ -1035,7 +1036,6 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     const host = document.createElement('div'); embed.innerHTML = ''; embed.appendChild(host);
     api.createController(host, { uri: 'spotify:track:' + QUEUE[qi].id, width: '100%', height: 152, theme: 'dark' }, c => {
       ctrl = c;
-      c.addListener('ready', () => { if (pendingPlay) { pendingPlay = false; c.play(); } });
       c.addListener('playback_update', e => {
         gotUpdate = true; const d = e.data; lastPos = d.position || 0;
         setPlaying(!d.isPaused && !d.isBuffering);
@@ -1054,6 +1054,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     npT.textContent = q.t; npA.textContent = q.a; npQ.textContent = (qi + 1) + ' of ' + QUEUE.length + ' · ' + q.note;
     vinyl.style.setProperty('--cover', 'url("' + q.cover + '")');
     creditNow.innerHTML = 'Now playing: <a href="' + trackUrl() + '">' + q.t + '</a> by ' + q.a + '.';
+    document.getElementById('np-open').href = trackUrl();
     tPos.textContent = '0:00'; tDur.textContent = started ? '' : 'Press play'; waveBars.forEach(b => b.classList.remove('past'));
     ppBtn.setAttribute('aria-label', 'Play ' + q.t);
   }
@@ -1068,7 +1069,10 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     else if (step > 0 && started) flashPill('Next · not a skip after 30s');
     const wasPlaying = playingNow;
     qi = (qi + step + QUEUE.length) % QUEUE.length; lastPos = 0; showTrack();
-    if (ctrl) { pendingPlay = wasPlaying; ctrl.loadUri('spotify:track:' + QUEUE[qi].id); if (wasPlaying) setTimeout(() => { if (pendingPlay) { pendingPlay = false; ctrl.play(); } }, 1200); }
+    if (ctrl) {
+      ctrl.loadUri('spotify:track:' + QUEUE[qi].id);
+      if (started || wasPlaying) { ctrl.play(); setTimeout(() => { if (!playingNow) ctrl.play(); }, 900); }
+    }
     else fallback();
   }
   document.getElementById('np-next').onclick = () => stepQueue(1);
