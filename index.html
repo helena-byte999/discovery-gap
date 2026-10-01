@@ -509,6 +509,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     <div style="display:flex;gap:18px;flex-wrap:wrap"><span class="key"><i class="s"></i>Lesser-known</span><span class="key"><i class="b"></i>Big</span><span class="key" id="f1-sizekey" hidden>Dot size = number of first listens</span></div>
     <div class="chart" id="f1-chart"></div>
     <p class="caption" id="f1-cap"></p>
+    <p class="note"><b style="color:var(--ink-2);font-weight:500">Gap</b> = big minus lesser-known skip rate, in percentage points (pts). A plus means big artists were skipped more.</p>
   </div>
 </section>
 
@@ -526,6 +527,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     </div>
     <div style="display:flex;gap:18px;flex-wrap:wrap"><span class="key"><i class="s"></i>Lesser-known</span><span class="key"><i class="b"></i>Big</span></div>
     <div class="chart" id="f2-chart"></div>
+    <p class="note"><b style="color:var(--ink-2);font-weight:500">Gap</b> = big minus lesser-known, in percentage points (pts). For L04, 25.2% − 8.2% = +16.9 pts. A plus means big artists stuck more, and every listener is a plus.</p>
     <p class="note" id="hear-note">A bouncy, stripped-back pop track made from the data. Each listener gets one bar: the stabs are their lesser-known stick rate, and the lead bends up into their big-artist rate. Higher stick rate, higher note. Notes snap to a minor scale, so L06's tiny 0.6-point gap sounds level. The other nine all climb.</p>
   </div>
   <div class="figs rv">
@@ -847,6 +849,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
       el('line', { x1: x(v), x2: x(v), y1: top - 6, y2: H - 4, stroke: 'rgba(255,255,255,.07)', 'stroke-width': 1 }, svg);
       el('text', { x: x(v), y: 14, 'text-anchor': 'middle' }, svg, v + '%');
     }
+    if (opts.gapLabel) el('text', { x: W - 6, y: 14, 'text-anchor': 'end', class: 'lbl' }, svg, 'Gap');
     const gs = [];
     rows.forEach((r, i) => {
       const y = top + i * rowH + rowH / 2;
