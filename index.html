@@ -526,7 +526,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     </div>
     <div style="display:flex;gap:18px;flex-wrap:wrap"><span class="key"><i class="s"></i>Lesser-known</span><span class="key"><i class="b"></i>Big</span></div>
     <div class="chart" id="f2-chart"></div>
-    <p class="note" id="hear-note">A club track made from the data. Each listener gets one bar: the stabs are their lesser-known stick rate, and the lead bends up into their big-artist rate. Higher stick rate, higher note. Notes snap to a minor scale, so L06's tiny 0.6-point gap sounds level. The other nine all climb.</p>
+    <p class="note" id="hear-note">A bouncy, stripped-back pop track made from the data. Each listener gets one bar: the stabs are their lesser-known stick rate, and the lead bends up into their big-artist rate. Higher stick rate, higher note. Notes snap to a minor scale, so L06's tiny 0.6-point gap sounds level. The other nine all climb.</p>
   </div>
   <div class="figs rv">
     <div class="fig"><span class="n">12<small>%</small> <small>vs</small> 19<small>%</small></span><p>Lesser-known vs big artists that stuck, all plays pooled</p></div>
@@ -901,17 +901,18 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   let f2groups = [];
   function drawF2() { f2groups = dumbbell(document.getElementById('f2-chart'), f2rows, 30, { gapLabel: true, label: 'Stick rate by listener' }); }
 
-  // ---------- "Hear the gap": the stick data as a hyperpop club track ----------
+  // ---------- "Hear the gap": the stick data as a bouncy, stripped-back pop track ----------
   // One bar per listener. Lesser-known stick rate = the stabs, big-artist rate = the note
   // the lead bends up into. Pitch climbs 1 scale step per ~1.4 pts, snapped to A minor.
   let actx = null, playing = false, bus = null, noiseBuf = null, timers = [];
   const BPM = 130, S16 = 60 / BPM / 4, BAR = S16 * 16;
   const MINOR = [0, 2, 3, 5, 7, 8, 10];
+  const at = (t, k) => t + k * S16 + (k % 2 ? S16 * .18 : 0);   // swung 16ths
   const leadHz = p => { const d = Math.round(p * 0.7), semis = Math.floor(d / 7) * 12 + MINOR[d % 7]; return 220 * Math.pow(2, semis / 12); };
   const ROOTS = [0, 8, 3, 10].map(x => 55 * Math.pow(2, x / 12)); // A, F, C, G
   function curve(k) { const n = 1024, c = new Float32Array(n); for (let i = 0; i < n; i++) { const x = i * 2 / n - 1; c[i] = (1 + k) * x / (1 + k * Math.abs(x)); } return c; }
   function makeBus() {
-    const shaper = actx.createWaveShaper(); shaper.curve = curve(5); shaper.oversample = '4x';
+    const shaper = actx.createWaveShaper(); shaper.curve = curve(2.2); shaper.oversample = '4x';
     const comp = actx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 8; comp.attack.value = .003; comp.release.value = .12;
     const out = actx.createGain(); out.gain.value = .55;
     shaper.connect(comp).connect(out).connect(actx.destination);
@@ -936,33 +937,38 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   function clap(t) { [0, .011, .022].forEach(d => noise(t + d, d === .022 ? .18 : .03, 'bandpass', 1600, .7)); }
   function hat(t, open) { noise(t, open ? .14 : .035, 'highpass', 8000, open ? .22 : .12); }
   function supersaw(hz, t, dur, gain, fromHz) {
-    const f = actx.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = 6;
-    f.frequency.setValueAtTime(5200, t); f.frequency.exponentialRampToValueAtTime(1400, t + dur);
-    const g = actx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + .006); g.gain.setTargetAtTime(gain * .55, t + .03, .08); g.gain.linearRampToValueAtTime(0, t + dur);
-    f.connect(g).connect(bus.synths);
-    [-14, -5, 0, 6, 15].forEach(det => {
-      const o = actx.createOscillator(); o.type = det === 0 ? 'square' : 'sawtooth'; o.detune.value = det;
-      if (fromHz) { o.frequency.setValueAtTime(fromHz, t); o.frequency.exponentialRampToValueAtTime(hz, t + .09); } else o.frequency.value = hz;
+    // bright, short pluck: square + an octave-up triangle, fast filter close
+    const f = actx.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = 3;
+    f.frequency.setValueAtTime(7000, t); f.frequency.exponentialRampToValueAtTime(900, t + Math.min(dur, .22));
+    const hp = actx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 280;
+    const g = actx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + .004); g.gain.exponentialRampToValueAtTime(gain * .25, t + .14); g.gain.linearRampToValueAtTime(0, t + dur);
+    f.connect(hp).connect(g).connect(bus.synths);
+    [[0, 'square', 1], [7, 'triangle', 2]].forEach(([det, type, mult]) => {
+      const o = actx.createOscillator(); o.type = type; o.detune.value = det;
+      const H = hz * mult, F = fromHz ? fromHz * mult : 0;
+      if (fromHz) { o.frequency.setValueAtTime(F, t); o.frequency.exponentialRampToValueAtTime(H, t + .11); } else o.frequency.value = H;
       o.connect(f); o.start(t); o.stop(t + dur + .02);
     });
   }
-  function bass(hz, t, dur) {
-    const f = actx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(900, t); f.frequency.exponentialRampToValueAtTime(220, t + dur);
-    const g = actx.createGain(); g.gain.setValueAtTime(.32, t); g.gain.linearRampToValueAtTime(0, t + dur);
-    const o = actx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = hz;
+  function bass(hz, t, dur, slideFrom) {
+    const f = actx.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = 14;   // the squelch
+    f.frequency.setValueAtTime(2200, t); f.frequency.exponentialRampToValueAtTime(160, t + Math.min(dur, .16));
+    const g = actx.createGain(); g.gain.setValueAtTime(.34, t); g.gain.linearRampToValueAtTime(0, t + dur);
+    const o = actx.createOscillator(); o.type = 'square';
+    if (slideFrom) { o.frequency.setValueAtTime(slideFrom, t); o.frequency.exponentialRampToValueAtTime(hz, t + .07); } else o.frequency.value = hz;
     const sub = actx.createOscillator(); sub.frequency.value = hz;
     o.connect(f); sub.connect(f); f.connect(g).connect(bus.synths); o.start(t); sub.start(t); o.stop(t + dur + .02); sub.stop(t + dur + .02);
   }
   function drumsBar(t, full) {
     for (let k = 0; k < 16; k++) {
-      const tk = t + k * S16;
+      const tk = at(t, k);
       if (k % 4 === 0) kick(tk);
       if (full && (k === 4 || k === 12)) clap(tk);
-      if (k % 4 === 2) hat(tk, true); else if (full && k % 2 === 1) hat(tk, false);
+      if (k === 6 || k === 14 || (full && k === 11)) hat(tk, false);
     }
-    if (full) noise(t + 15 * S16, S16, 'bandpass', 3000, .4); // little fill
   }
-  function bassBar(t, root) { [0, 2, 3, 6, 8, 10, 11, 14].forEach(k => bass(k === 2 || k === 10 ? root * 2 : root, t + k * S16, S16 * .9)); }
+  // bouncy, syncopated line; the last note slides down from an octave up
+  function bassBar(t, root) { [0, 3, 6, 10, 11, 14].forEach(k => bass(k === 11 ? root * 2 : root, at(t, k), S16 * (k === 6 ? 2.6 : .85), k === 14 ? root * 2 : 0)); }
   const hearBtn = document.getElementById('hear'), hearLabel = hearBtn.querySelector('span');
   function stopTrack() {
     timers.forEach(clearTimeout); timers = [];
@@ -982,9 +988,9 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     f2rows.forEach((r, i) => {
       const t = t0 + (i + 1) * BAR, lo = leadHz(r.a), hi = leadHz(r.b);
       drumsBar(t, true); bassBar(t, ROOTS[i % 4]);
-      [0, 3, 6].forEach(k => supersaw(lo, t + k * S16, S16 * 1.6, .16));   // lesser-known stabs
-      supersaw(hi, t + 8 * S16, S16 * 2.6, .2, lo);                       // bend up into the big-artist note
-      [11, 14].forEach(k => supersaw(hi, t + k * S16, S16 * 1.4, .16));
+      [0, 2, 5].forEach(k => supersaw(lo, at(t, k), S16 * .9, .17));     // lesser-known plucks
+      supersaw(hi, at(t, 8), S16 * 2.2, .2, lo);                          // bend up into the big-artist note
+      [11, 12, 14].forEach(k => supersaw(hi, at(t, k), S16 * .8, .16));
       timers.push(setTimeout(() => { f2groups.forEach(g => g.classList.remove('on')); f2groups[i].classList.add('on'); eq(i); }, (t - actx.currentTime) * 1000));
     });
     const tEnd = t0 + (f2rows.length + 1) * BAR;
