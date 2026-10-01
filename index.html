@@ -96,7 +96,7 @@ p { margin: 0; }
   background: repeating-radial-gradient(circle, #0c0c10 0 2px, #16161c 2px 4px); box-shadow: 0 20px 50px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
   animation: spin 9s linear infinite; animation-play-state: paused; }
 .phone.playing .vinyl { animation-play-state: running; }
-.vinyl::before { content: ""; position: absolute; inset: 58px; border-radius: 50%; background: url("https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e022bbec58d7568dfebbcbfccb1") center / cover, conic-gradient(from 30deg, var(--blue), var(--pink), var(--violet), var(--blue)); }
+.vinyl::before { content: ""; position: absolute; inset: 58px; border-radius: 50%; background: var(--cover, none) center / cover, conic-gradient(from 30deg, var(--blue), var(--pink), var(--violet), var(--blue)); }
 .vinyl::after { content: ""; position: absolute; inset: 95px; border-radius: 50%; background: #0A0A12; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .np { display: grid; gap: 10px; color: #fff; }
@@ -105,6 +105,11 @@ p { margin: 0; }
 .np .a { text-align: center; font-size: 13px; opacity: .6; margin-top: -8px; }
 .ctrl { display: flex; justify-content: center; align-items: center; gap: 26px; }
 .ctrl svg { width: 18px; height: 18px; fill: #fff; }
+.ctrl .skip { width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; cursor: pointer; }
+.ctrl .skip:hover { background: rgba(255,255,255,.1); }
+.np .pill { transition: background .2s, color .2s; }
+.np .pill.skipped { background: var(--pink); color: #fff; box-shadow: none; }
+.np .qpos { text-align: center; font: 11px var(--mono); color: rgba(255,255,255,.5); margin-top: -6px; }
 .ctrl .play { width: 54px; height: 54px; border-radius: 50%; border: 0; background: rgba(255,255,255,.1); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); display: grid; place-items: center; cursor: pointer; color: #fff; }
 .wave { display: flex; align-items: flex-end; gap: 2px; height: 42px; }
 .wave i { flex: 1; background: #fff; border-radius: 1px; height: 100%; transform-origin: bottom; transform: scaleY(var(--h, .4)); opacity: .9; }
@@ -405,13 +410,14 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
         <div class="bar-t"><span>⌄</span><span>Radio</span><span>♡</span></div>
         <div class="vinyl" aria-hidden="true"></div>
         <div class="np">
-          <span class="pill">First listen · lean-back</span>
-          <div class="t">Protocol</div>
-          <div class="a">Cali-Ber Tha Grime</div>
+          <span class="pill" id="pill">First listen · lean-back</span>
+          <div class="t" id="np-t">Moja</div>
+          <div class="a" id="np-a">Dlala Thukzin, Zeh McGeba, MK Productions</div>
+          <div class="qpos" id="np-q">1 of 5</div>
           <div class="ctrl">
-            <svg viewBox="0 0 16 16"><path d="M3 2h2v12H3zM14 2.5v11L6 8z"/></svg>
-            <button type="button" class="play" id="phone-play" aria-label="Play Protocol"><svg viewBox="0 0 16 16"><path id="pp-icon" d="M4 2.5v11l9-5.5z"/></svg></button>
-            <svg viewBox="0 0 16 16"><path d="M11 2h2v12h-2zM2 2.5v11L10 8z"/></svg>
+            <button type="button" class="skip" id="np-prev" aria-label="Previous song"><svg viewBox="0 0 16 16"><path d="M3 2h2v12H3zM14 2.5v11L6 8z"/></svg></button>
+            <button type="button" class="play" id="phone-play" aria-label="Play Moja"><svg viewBox="0 0 16 16"><path id="pp-icon" d="M4 2.5v11l9-5.5z"/></svg></button>
+            <button type="button" class="skip" id="np-next" aria-label="Skip to next song"><svg viewBox="0 0 16 16"><path d="M11 2h2v12h-2zM2 2.5v11L10 8z"/></svg></button>
           </div>
           <div class="times"><span id="t-pos">0:00</span><span id="t-dur">Press play</span></div>
           <div class="wave" id="wave" aria-hidden="true"></div>
@@ -427,7 +433,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   </div>
   <div class="listen" id="listen">
     <div class="embed" id="embed"><p class="fallback">Loading the Spotify player…</p></div>
-    <p class="credit">Now playing: <a href="https://open.spotify.com/track/2Z6h0SHDcPGy0u0D0h1xMo">Protocol</a> by Cali-Ber Tha Grime, a lesser-known artist from the sample, heard by 5 of the 10 listeners. Through Spotify's own player; logged-out visitors hear a 30-second preview.</p>
+    <p class="credit"><span id="credit-now"></span> A 5-song queue: two of Ena's picks and three lesser-known artists from the sample. Skip one in under 30 seconds and the phone marks it, the same way this study counts a skip. Through Spotify's own player; logged-out visitors hear a 30-second preview.</p>
   </div>
 </header>
 
@@ -918,8 +924,19 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   }
   hearBtn.onclick = hear;
 
-  // ---------- hero phone plays "Protocol" through Spotify's iFrame API ----------
-  const TRACK = 'spotify:track:2Z6h0SHDcPGy0u0D0h1xMo', TRACK_URL = 'https://open.spotify.com/track/2Z6h0SHDcPGy0u0D0h1xMo';
+  // ---------- hero phone: a 4-song queue through Spotify's iFrame API ----------
+  const CDN = 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02';
+  const QUEUE = [
+    { id: '3USDaKxyFcwD6ehOYowW2j', t: 'Moja', a: 'Dlala Thukzin, Zeh McGeba, MK Productions', cover: CDN + '753bd171a42d4c9e8ef2530e', note: "Ena's pick" },
+    { id: '2Z6h0SHDcPGy0u0D0h1xMo', t: 'Protocol', a: 'Cali-Ber Tha Grime', cover: CDN + '2bbec58d7568dfebbcbfccb1', note: 'Lesser-known, from the sample' },
+    { id: '2Co0IjcLTSHMtodwD4gzfg', t: 'I Bet on Losing Dogs', a: 'Mitski', cover: CDN + '42cb382726e956058bf73ed3', note: "Ena's pick" },
+    { id: '611y0fYELYaLtjiMKbxO4N', t: 'Folake', a: 'taves', cover: CDN + '678ee91c94decd399d65d8b6', note: 'Lesser-known, from the sample' },
+    { id: '3GKP5FZ3p29o082QOwIEiu', t: 'Cameras', a: 'SuperJazzClub', cover: CDN + '717be9c8c3f0ded5635cc597', note: 'Lesser-known, from the sample' }
+  ];
+  let qi = 0, lastPos = 0, started = false, playingNow = false, pendingPlay = false;
+  const npT = document.getElementById('np-t'), npA = document.getElementById('np-a'), npQ = document.getElementById('np-q');
+  const pill = document.getElementById('pill'), creditNow = document.getElementById('credit-now'), vinyl = document.querySelector('.vinyl');
+  const trackUrl = () => 'https://open.spotify.com/track/' + QUEUE[qi].id;
   const phone = document.querySelector('.phone'), ppIcon = document.getElementById('pp-icon'), ppBtn = document.getElementById('phone-play');
   const embed = document.getElementById('embed'), listen = document.getElementById('listen');
   const tPos = document.getElementById('t-pos'), tDur = document.getElementById('t-dur'), waveBars = [...wave.children];
@@ -928,18 +945,19 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   function setPlaying(on) {
     phone.classList.toggle('playing', on); wave.classList.toggle('on', on && !reduce);
     ppIcon.setAttribute('d', on ? 'M4 2.5h3v11H4zM9 2.5h3v11H9z' : 'M4 2.5v11l9-5.5z');
-    ppBtn.setAttribute('aria-label', on ? 'Pause Protocol' : 'Play Protocol');
+    ppBtn.setAttribute('aria-label', (on ? 'Pause ' : 'Play ') + QUEUE[qi].t); playingNow = on; if (on) started = true;
   }
   function fallback() {
     if (ctrl) return;
-    embed.innerHTML = '<p class="fallback">The Spotify player can\'t load here. <a href="' + TRACK_URL + '">Listen to Protocol on Spotify</a>.</p>';
+    embed.innerHTML = '<p class="fallback">The Spotify player can\'t load here. <a href="' + trackUrl() + '">Listen to ' + QUEUE[qi].t + ' on Spotify</a>.</p>';
   }
   window.onSpotifyIframeApiReady = api => {
     const host = document.createElement('div'); embed.innerHTML = ''; embed.appendChild(host);
-    api.createController(host, { uri: TRACK, width: '100%', height: 152, theme: 'dark' }, c => {
+    api.createController(host, { uri: 'spotify:track:' + QUEUE[qi].id, width: '100%', height: 152, theme: 'dark' }, c => {
       ctrl = c;
+      c.addListener('ready', () => { if (pendingPlay) { pendingPlay = false; c.play(); } });
       c.addListener('playback_update', e => {
-        gotUpdate = true; const d = e.data;
+        gotUpdate = true; const d = e.data; lastPos = d.position || 0;
         setPlaying(!d.isPaused && !d.isBuffering);
         if (d.duration) {
           tPos.textContent = mmss(d.position); tDur.textContent = mmss(d.duration);
@@ -951,6 +969,32 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   const api = document.createElement('script'); api.src = 'https://open.spotify.com/embed/iframe-api/v1'; api.async = true;
   api.onerror = fallback; document.body.appendChild(api);
   setTimeout(fallback, 6000);
+  function showTrack() {
+    const q = QUEUE[qi];
+    npT.textContent = q.t; npA.textContent = q.a; npQ.textContent = (qi + 1) + ' of ' + QUEUE.length + ' · ' + q.note;
+    vinyl.style.setProperty('--cover', 'url("' + q.cover + '")');
+    creditNow.innerHTML = 'Now playing: <a href="' + trackUrl() + '">' + q.t + '</a> by ' + q.a + '.';
+    tPos.textContent = '0:00'; tDur.textContent = started ? '' : 'Press play'; waveBars.forEach(b => b.classList.remove('past'));
+    ppBtn.setAttribute('aria-label', 'Play ' + q.t);
+  }
+  let pillTimer;
+  function flashPill(text) {
+    clearTimeout(pillTimer); pill.textContent = text; pill.classList.add('skipped');
+    pillTimer = setTimeout(() => { pill.textContent = 'First listen · lean-back'; pill.classList.remove('skipped'); }, 2600);
+  }
+  function stepQueue(step) {
+    // a skip in this study = ended by pressing next, or played for under 30 seconds
+    if (step > 0 && started && lastPos < 30000) flashPill('Skipped · under 30s');
+    else if (step > 0 && started) flashPill('Next · not a skip after 30s');
+    const wasPlaying = playingNow;
+    qi = (qi + step + QUEUE.length) % QUEUE.length; lastPos = 0; showTrack();
+    if (ctrl) { pendingPlay = wasPlaying; ctrl.loadUri('spotify:track:' + QUEUE[qi].id); if (wasPlaying) setTimeout(() => { if (pendingPlay) { pendingPlay = false; ctrl.play(); } }, 1200); }
+    else fallback();
+  }
+  document.getElementById('np-next').onclick = () => stepQueue(1);
+  document.getElementById('np-prev').onclick = () => stepQueue(-1);
+  showTrack();
+
   ppBtn.onclick = () => {
     if (!ctrl) { fallback(); listen.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); return; }
     gotUpdate = false; ctrl.togglePlay();
