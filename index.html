@@ -429,7 +429,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     <div class="float f-problem" data-depth="30"><div class="card"><span class="tag">Problem</span><p>A liked first listen of a lesser-known artist usually leads nowhere. 84% aren't heard again within two weeks, and listeners rarely go back on their own.</p></div></div>
     <div class="float f-stick" data-depth="22"><div class="card chipc"><small>Still played 30–90 days later</small><div class="big-n"><span style="color:var(--small)">12%</span> <span style="color:var(--muted);font-size:18px">vs</span> 19%</div><small>Lesser-known vs big artists</small></div></div>
     <div class="float f-solution" data-depth="40"><div class="card"><span class="tag">Solution</span><p><b style="color:#fff">Second Listen.</b> After two quiet weeks, bring the artist back once, with a different song, in the radio or mix where the listener first heard them.</p></div></div>
-    <div class="float f-ten" data-depth="14"><div class="card chipc"><div class="big-n">10<span style="color:var(--muted);font-size:18px"> of 10</span></div><small>listeners show the gap · p = 0.002</small></div></div>
+    <div class="float f-ten" data-depth="14"><div class="card chipc"><div class="big-n">10<span style="color:var(--muted);font-size:18px"> of 10</span></div><small>listeners show the gap · very unlikely to be chance</small></div></div>
   </div>
   <div class="listen" id="listen">
     <div class="embed" id="embed"><p class="fallback">Loading the Spotify player…</p></div>
@@ -478,8 +478,8 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     <div class="branches">
       <div class="branch"><span class="node head">Clean</span><span class="node leaf">Podcasts dropped</span><span class="node leaf">IP addresses never loaded</span><span class="node leaf">Spellings merged</span></div>
       <div class="branch"><span class="node head">Size artists</span><span class="node leaf">Last.fm listeners</span><span class="node leaf">Ranked within genre</span><span class="node leaf">Deezer fans as a check</span></div>
-      <div class="branch"><span class="node head">Define moments</span><span class="node leaf">Skip: under 30s</span><span class="node leaf">Lean-back vs chosen</span><span class="node leaf">Liked, lost, stuck</span></div>
-      <div class="branch"><span class="node head">Compare</span><span class="node leaf">Within each listener</span><span class="node leaf">10,000-resample bootstrap</span><span class="node leaf">Sign test, leave-one-out</span></div>
+      <div class="branch"><span class="node head">Define moments</span><span class="node leaf">Skip: under 30s</span><span class="node leaf">Played on by itself vs picked</span><span class="node leaf">Liked, lost, stuck</span></div>
+      <div class="branch"><span class="node head">Compare</span><span class="node leaf">Within each listener</span><span class="node leaf">Re-checked 10,000 ways (bootstrap)</span><span class="node leaf">Still true without any one listener</span></div>
     </div>
   </div>
   <div class="hyps">
@@ -488,6 +488,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     <div class="hyp rv"><span class="label">H3</span><p>Lesser-known artists stick less after a first listen</p><span class="chip yes">Supported · 10 of 10</span></div>
     <div class="hyp rv"><span class="label">H4</span><p>Listeners go back on their own to new artists they liked</p><span class="chip">Rarely · 1–2%</span></div>
   </div>
+  <p class="caption">Two terms used throughout: a <b>lean-back</b> listen is a song that played on by itself (radio, autoplay, or a playlist carrying on) rather than one the listener picked. <b>Lesser-known</b> means in the bottom third of artists in the same genre.</p>
   <p class="caption">The question changed from <b>"is discovery unfair?"</b> to <b>"why does a fair introduction lead nowhere?"</b> A single global size cut-off would have called 357 of 412 Afrobeats artists lesser-known, so artists are ranked within their own genre.</p>
 </section>
 
@@ -496,13 +497,13 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   <div class="sec-row"><span>A2</span><span>//Finding 1</span><span>No penalty</span></div>
   <div class="sec-head rv">
     <h2>A fair first <span class="grad">listen.</span></h2>
-    <p class="lede">Pool everyone's plays and lesser-known artists seem to win by 10 points. <b>Look inside each listener and the advantage mostly disappears.</b></p>
+    <p class="lede">Add everyone's plays together and lesser-known artists seem to win by 10 points. <b>Look inside each listener and the advantage mostly disappears.</b></p>
   </div>
   <div class="panel rv">
     <div class="panel-top">
-      <div><div class="panel-title">Lean-back first listens that were skipped</div><div class="panel-sub">Lean-back: the song played on by itself</div></div>
+      <div><div class="panel-title">Lean-back first listens that were skipped</div><div class="panel-sub">First time a listener heard an artist, on a song that played on by itself · L01–L10 are the 10 listeners, anonymised</div></div>
       <div class="seg" role="group" aria-label="View">
-        <button type="button" id="f1-pooled" aria-pressed="true">All plays pooled</button>
+        <button type="button" id="f1-pooled" aria-pressed="true">Everyone added together</button>
         <button type="button" id="f1-within" aria-pressed="false">Each listener</button>
       </div>
     </div>
@@ -522,7 +523,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   </div>
   <div class="panel rv">
     <div class="panel-top">
-      <div><div class="panel-title">Artists still played 30–90 days later</div><div class="panel-sub">By listener, sorted by gap</div></div>
+      <div><div class="panel-title">Artists still played 30–90 days later</div><div class="panel-sub">One row per listener (L01–L10, anonymised), sorted by gap</div></div>
       <button type="button" class="btn" id="hear"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg><span>Hear the gap</span></button>
     </div>
     <div style="display:flex;gap:18px;flex-wrap:wrap"><span class="key"><i class="s"></i>Lesser-known</span><span class="key"><i class="b"></i>Big</span></div>
@@ -531,10 +532,10 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     <p class="note" id="hear-note">A bouncy, stripped-back pop track made from the data. Each listener gets one bar: the stabs are their lesser-known stick rate, and the lead bends up into their big-artist rate. Higher stick rate, higher note. Notes snap to a minor scale, so L06's tiny 0.6-point gap sounds level. The other nine all climb.</p>
   </div>
   <div class="figs rv">
-    <div class="fig"><span class="n">12<small>%</small> <small>vs</small> 19<small>%</small></span><p>Lesser-known vs big artists that stuck, all plays pooled</p></div>
-    <div class="fig"><span class="n">8.8<small>pts</small></span><p>Median gap within each listener</p></div>
-    <div class="fig"><span class="n">10<small>/10</small></span><p>Listeners show it. Sign test p = 0.002</p></div>
-    <div class="fig"><span class="n">5.9–9.3</span><p>The gap when any one listener is left out</p></div>
+    <div class="fig"><span class="n">12<small>%</small> <small>vs</small> 19<small>%</small></span><p>Lesser-known vs big artists that stuck, everyone's plays added together</p></div>
+    <div class="fig"><span class="n">8.8<small>pts</small></span><p>Typical gap for a single listener (median)</p></div>
+    <div class="fig"><span class="n">10<small>/10</small></span><p>Listeners show it. Odds of that by chance: about 1 in 500 (p = 0.002)</p></div>
+    <div class="fig"><span class="n">5.9–9.3</span><p>The gap when any one listener is removed. It never disappears.</p></div>
   </div>
 </section>
 
@@ -564,7 +565,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
       </div>
     </div>
     <p class="caption" id="ff-cap"></p>
-    <p class="note">Leaves out the one listener whose background listening makes "liked" unreliable. Under the proposed trigger rules the figure is 3.3% against 7.1%. The gap holds within all 10 listeners (median 5 points, p = 0.002). This is correlation, not proof: that's what the experiment is for.</p>
+    <p class="note">Leaves out the one listener whose background listening makes "liked" unreliable. Under the proposed trigger rules the figure is 3.3% against 7.1%. The gap shows up for all 10 listeners (typically 5 points; about a 1-in-500 chance of that by luck). This is correlation, not proof: that's what the experiment is for.</p>
   </div>
   <div class="figs rv">
     <div class="fig"><span class="n">1.0<small>%</small></span><p>of liked lesser-known first listens got a click back from the listener (1.9% for big)</p></div>
@@ -616,7 +617,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   </div>
   <div class="rules">
     <div class="rule rv"><span class="label">Trigger</span><ul><li>A lean-back first listen of a lesser-known artist, played to the end</li><li>No play of that artist in the next 14 days</li></ul></div>
-    <div class="rule rv"><span class="label">Excluded</span><ul><li>Sleep and background contexts</li><li>Discovery Mode placements</li><li>Unverified artists, or 1–2 songs only</li></ul></div>
+    <div class="rule rv"><span class="label">Excluded</span><ul><li>Sleep and background contexts</li><li>Songs artists paid to promote (Discovery Mode)</li><li>Unverified artists, or 1–2 songs only</li></ul></div>
     <div class="rule rv"><span class="label">Limits</span><ul><li>One try per artist, at most 2 a week</li><li>Fewer for loyal listeners</li><li>"Hide" removes the artist</li></ul></div>
     <div class="rule rv"><span class="label">v2, if v1 works</span><ul><li>A reason line: "You listened to X two weeks ago"</li><li>An anchor: "with Y"</li><li>Test in Discover Weekly</li></ul></div>
   </div>
@@ -627,7 +628,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   <div class="sec-row"><span>B2</span><span>//Measurement</span><span>A/B test</span></div>
   <div class="sec-head rv">
     <h2>Testing <span class="grad">it.</span></h2>
-    <p class="lede">Randomised by listener. <b>Primary metric:</b> of triggered artists, the share where the listener plays a different song by them in days 30–90. Baseline 3.3%.</p>
+    <p class="lede">Half of listeners get Second Listen, half don't, chosen at random. <b>Success means</b> more listeners go on to play a different song by the artist 30–90 days later. Today that happens 3.3% of the time.</p>
   </div>
   <div class="panel rv">
     <div class="panel-top">
@@ -645,26 +646,26 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
           <span class="hint">Some will be skipped past, or never reached in a session.</span>
         </div>
         <div class="knob">
-          <div class="knob-h"><label for="k-lift">Lift among those who hear it</label><output id="o-lift" for="k-lift"></output></div>
+          <div class="knob-h"><label for="k-lift">How much it helps those who hear it</label><output id="o-lift" for="k-lift"></output></div>
           <input type="range" id="k-lift" min="10" max="150" step="5" value="100">
           <span class="hint">+100% means the primary metric doubles, from 3.3% to 6.5%.</span>
         </div>
       </div>
       <div class="outs">
-        <div class="fig"><span class="n" id="r-arm">–</span><p>Listeners needed per arm (80% power, listener-clustered)</p></div>
-        <div class="fig"><span class="n" id="r-conn">–</span><p>More listener–artist connections reaching a second song, per month, per 1M listeners like the median one here</p></div>
+        <div class="fig"><span class="n" id="r-arm">–</span><p>Listeners needed in each group of the test (one group gets Second Listen, one doesn't)</p></div>
+        <div class="fig"><span class="n" id="r-conn">–</span><p>Extra times a month a listener goes on to a second song by a new artist, per 1 million listeners like the typical one here</p></div>
       </div>
     </div>
-    <p class="note">From sizing.py: 1.2 triggers per listener a month, baseline 3.26%, intra-class correlation planned at 0.02. Units, not a forecast: the sample is heavy listeners. The 90-day readout, not traffic, sets the timeline.</p>
+    <p class="note">These are rough units, not a forecast: the 10 listeners here listen far more than most people. Technical detail: from sizing.py, 1.2 triggers per listener a month, baseline 3.26%, 80% power, intra-class correlation planned at 0.02. The 90 days of waiting, not the number of users, set the timeline.</p>
   </div>
   <div class="tbl rv">
     <table>
       <thead><tr><th>Type</th><th>Metric</th></tr></thead>
       <tbody>
-        <tr><td>Primary</td><td>A different song by the triggered artist, played and not skipped, in days 30–90. The re-introduced song doesn't count.</td></tr>
-        <tr><td>Leading · 30 days</td><td>Something the re-introduction can't produce by itself: a return the listener starts, a save, or a follow</td></tr>
-        <tr><td>Guardrails</td><td>Listening time per session, skip rate on re-introduced tracks, hide rate. Reported separately for loyal listeners.</td></tr>
-        <tr><td>Counter-metric</td><td>The primary metric for other artists in the same surfaces, to catch crowding out</td></tr>
+        <tr><td>Primary<br><span style="font-weight:400;color:var(--muted);font-size:13px">the main success measure</span></td><td>A different song by the triggered artist, played and not skipped, in days 30–90. The re-introduced song doesn't count.</td></tr>
+        <tr><td>Leading · 30 days<br><span style="font-weight:400;color:var(--muted);font-size:13px">an early sign, before day 90</span></td><td>Something the re-introduction can't produce by itself: a return the listener starts, a save, or a follow</td></tr>
+        <tr><td>Guardrails<br><span style="font-weight:400;color:var(--muted);font-size:13px">must not get worse</span></td><td>Listening time per session, skip rate on re-introduced tracks, hide rate. Reported separately for loyal listeners.</td></tr>
+        <tr><td>Counter-metric<br><span style="font-weight:400;color:var(--muted);font-size:13px">checks for side effects</span></td><td>Whether other artists in the same radio, autoplay and mixes lose out</td></tr>
         <tr><td>Decision rule</td><td>Ship if the primary metric rises and no guardrail breaks. Iterate on timing or song choice if only the leading metric moves. Stop if re-introductions are skipped more than the surface's normal rate.</td></tr>
       </tbody>
     </table>
@@ -706,7 +707,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
       <h3>What I learned</h3>
       <ul>
         <li><b>The most useful moment was the hypothesis failing.</b> Following the data past the first listen gave a sharper, more buildable problem.</li>
-        <li><b>A pooled number nearly misled me.</b> My first draft headlined "skipped less: 7.9% vs 17.8%". A peer review showed that mostly reflects who listens. Now every comparison is within listeners first.</li>
+        <li><b>An all-plays-added-together number nearly misled me.</b> My first draft headlined "skipped less: 7.9% vs 17.8%". A peer review showed that mostly reflects who listens. Now every comparison is within listeners first.</li>
         <li><b>Measurement took most of the time.</b> Ranking within genre, checked by hand against Spotify, stopped Burna Boy from counting as "mid".</li>
         <li><b>Interviews need neutral questions.</b> Where I raised "popularity bias" myself, the answer isn't used as evidence.</li>
       </ul>
@@ -715,7 +716,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
       <h3>Limits</h3>
       <ul>
         <li>10 friends, mostly heavy listeners in Nigeria and the UK. One has 27% of the plays.</li>
-        <li>"Lean-back" mixes Spotify's surfaces with the listener's own playlists. "Liked" means not skipped.</li>
+        <li>"Lean-back" can't tell Spotify's radio and autoplay apart from the listener's own playlists. "Liked" means not skipped.</li>
         <li>A "first listen" is the first in the export. Big artists may have been heard before.</li>
         <li>Observational data can't see recommendations shown but not played.</li>
       </ul>
@@ -881,8 +882,8 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     document.getElementById('f1-sizekey').hidden = mode !== 'within';
     if (mode === 'pooled') {
       dumbbell(f1, [{ id: 'All 10', a: pooledS, b: pooledB, ra: 9, rb: 9,
-        tip: `<b>All plays pooled</b><br>Lesser-known ${fmt(pooledS)}% skipped · big ${fmt(pooledB)}%` }], 60, { rowH: 64, gapLabel: true, label: 'Pooled skip rate' });
-      f1cap.innerHTML = `Pooled, lesser-known artists are skipped <b>${fmt(pooledS)}%</b> of the time against <b>${fmt(pooledB)}%</b> for big ones. That looks like a 10-point advantage. Switch to <b>Each listener</b> to see where it comes from.`;
+        tip: `<b>Everyone added together</b><br>Lesser-known ${fmt(pooledS)}% skipped · big ${fmt(pooledB)}%` }], 60, { rowH: 64, gapLabel: true, label: 'Pooled skip rate' });
+      f1cap.innerHTML = `With everyone's plays added together, lesser-known artists are skipped <b>${fmt(pooledS)}%</b> of the time against <b>${fmt(pooledB)}%</b> for big ones. That looks like a 10-point advantage. Switch to <b>Each listener</b> to see where it comes from.`;
     } else {
       const rad = n => Math.max(4, Math.min(16, 1.6 * Math.sqrt(n / 30)));
       const rows = people.slice().sort((p, q) => (p.bSkip - p.sSkip) - (q.bSkip - q.sSkip)).map(p => ({
@@ -890,7 +891,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
         tip: `<b>${p.id}</b><br>Lesser-known: ${fmt(p.sSkip)}% of ${p.sN.toLocaleString()} first listens<br>Big: ${fmt(p.bSkip)}% of ${p.bN.toLocaleString()}`
       }));
       dumbbell(f1, rows, 60, { gapLabel: true, label: 'Skip rate by listener' });
-      f1cap.innerHTML = `Within each listener the gap is a median of <b>2 points</b>. 7 listeners lean one way, 3 the other, and it isn't significant (p = 0.34). The big violet dot is <b>L05</b>, a heavy background listener who supplies over half of these first listens and skips only 1.5%. The fair reading is <b>no penalty</b>, not an advantage.`;
+      f1cap.innerHTML = `Within each listener the gap is a median of <b>2 points</b>. 7 listeners lean one way, 3 the other, and that split could easily be chance (p = 0.34). The big violet dot is <b>L05</b>, a heavy background listener who supplies over half of these first listens and skips only 1.5%. The fair reading is <b>no penalty</b>, not an advantage.`;
     }
   }
   document.getElementById('f1-pooled').onclick = () => { f1mode = 'pooled'; drawF1(); };
@@ -1192,6 +1193,10 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   document.getElementById('m-prev').onclick = () => { const c = current(); c <= 0 ? scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }) : go(secs[c - 1]); };
 
   // ---------- boot ----------
+  // always start at the top on load or refresh, even after following a section link
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  try { if (location.hash) history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  scrollTo(0, 0);
   drawF1(); drawF2(); setStage(0); setDay(0); calc(); onScroll();
   addEventListener('resize', () => { drawField(FIELDS.small, 1); drawField(FIELDS.big, 1); });
 })();
