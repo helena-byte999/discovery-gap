@@ -20,7 +20,7 @@
   --line-2: rgba(255, 255, 255, .14);
   --ink: #F4F3F8;
   --ink-2: #A9A7B7;
-  --muted: #6E6C7C;
+  --muted: #8A879C;   /* 5.0–5.8:1 on every background here (WCAG AA) */
   --small: #B26BFF;
   --big: #E4E2EC;
   --faint: #25242D;
@@ -106,29 +106,37 @@ p { margin: 0; }
 .np { display: grid; gap: 10px; color: #fff; }
 .np .pill { justify-self: center; font-size: 12px; padding: 5px 11px; border-radius: 999px; background: rgba(255,255,255,.1); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
 .np .t { text-align: center; font-size: 19px; font-weight: 500; line-height: 1.2; }
-.np .a { text-align: center; font-size: 13px; opacity: .6; margin-top: -8px; }
+.np .a { text-align: center; font-size: 13px; opacity: .75; margin-top: -8px; }
 .ctrl { display: flex; justify-content: center; align-items: center; gap: 26px; }
 .ctrl svg { width: 18px; height: 18px; fill: #fff; }
 .ctrl .skip { width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; cursor: pointer; }
 .ctrl .skip:hover { background: rgba(255,255,255,.1); }
 .np .pill { transition: background .2s, color .2s; }
 .np .pill.skipped { background: var(--pink); color: #fff; box-shadow: none; }
-.np .qpos { text-align: center; font: 11px var(--mono); color: rgba(255,255,255,.5); margin-top: -6px; }
-.ctrl .play { width: 54px; height: 54px; border-radius: 50%; border: 0; background: rgba(255,255,255,.1); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); display: grid; place-items: center; cursor: pointer; color: #fff; }
+.np .qpos { text-align: center; font: 12px var(--mono); color: rgba(255,255,255,.68); margin-top: -6px; }
+.ctrl .play { position: relative; width: 54px; height: 54px; border-radius: 50%; border: 0; background: rgba(255,255,255,.1); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); display: grid; place-items: center; cursor: pointer; color: #fff; }
+/* taps: no grey iPhone flash, no double-tap delay, a small press */
+.ctrl button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform .12s ease, background .2s; }
+.ctrl button:active { transform: scale(.9); }
+/* waiting for the Spotify player: a ring instead of a dead button */
+.ctrl .play.loading::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid rgba(255,255,255,.15); border-top-color: #fff; animation: spin .8s linear infinite; }
 .wave { display: flex; align-items: flex-end; gap: 2px; height: 42px; }
 .wave i { flex: 1; background: #fff; border-radius: 1px; height: 100%; transform-origin: bottom; transform: scaleY(var(--h, .4)); opacity: .9; }
 .wave.on i { animation: bounce var(--d, .9s) ease-in-out infinite alternate; }
 .wave i.past { opacity: .35; }
 .np .a { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .listen { width: min(460px, 100%); display: grid; gap: 8px; margin: 18px auto 0; text-align: left; }
-.listen .embed { min-height: 152px; border-radius: 14px; overflow: hidden; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); display: grid; place-items: center; }
-.listen .embed iframe { display: block; border: 0; }
+.listen .embed { position: relative; height: 152px; border-radius: 14px; overflow: hidden; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); display: grid; place-items: center; }
+/* one Spotify player per song, stacked; only the current one is visible */
+.listen .slot { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity .25s; }
+.listen .slot.on { opacity: 1; pointer-events: auto; }
+.listen .embed iframe { display: block; border: 0; width: 100%; height: 152px; }
 .listen .fallback { font-size: 14px; color: var(--ink-2); padding: 20px; text-align: center; }
 .listen .credit { font-size: 13px; color: var(--muted); }
 .listen .credit a { color: var(--ink-2); }
 .listen.nudge .embed { box-shadow: inset 0 0 0 2px var(--small); }
 @keyframes bounce { from { transform: scaleY(calc(var(--h) * .35)); } to { transform: scaleY(var(--h)); } }
-.times { display: flex; justify-content: space-between; font: 11px var(--mono); color: rgba(255,255,255,.55); margin-top: -4px; }
+.times { display: flex; justify-content: space-between; font: 12px var(--mono); color: rgba(255,255,255,.72); margin-top: -4px; }
 
 .float { position: absolute; will-change: transform; }
 .float > .card { animation: bob 6s ease-in-out infinite alternate; }
@@ -220,7 +228,7 @@ section.sec { padding-block: 90px 40px; display: grid; gap: 34px; scroll-margin-
 @media (max-width: 520px) { .hyps { grid-template-columns: 1fr; } }
 .hyp { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 20px; display: grid; gap: 14px; align-content: space-between; min-height: 170px; }
 .hyp p { font-size: 15.5px; line-height: 1.45; }
-.chip { justify-self: start; font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--ink-2); }
+.chip { justify-self: start; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--ink-2); }
 .chip.yes { background: var(--grad); color: #fff; border-color: transparent; }
 
 /* panels + charts */
@@ -256,7 +264,7 @@ section.sec { padding-block: 90px 40px; display: grid; gap: 34px; scroll-margin-
 /* dot fields */
 .stepper { display: flex; flex-wrap: wrap; gap: 8px; }
 .stepper button { font: 500 14px/1.25 var(--body); text-align: left; border: 0; background: var(--panel-2); color: var(--ink-2); border-radius: 14px; padding: 11px 16px; cursor: pointer; display: grid; gap: 3px; box-shadow: inset 0 0 0 1px var(--line); }
-.stepper button span { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.stepper button span { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
 .stepper button[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 0 0 1px var(--small); background: #1C1726; }
 .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
 .field { display: grid; gap: 10px; }
@@ -279,14 +287,14 @@ section.sec { padding-block: 90px 40px; display: grid; gap: 34px; scroll-margin-
 .demo { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 30px; align-items: start; }
 @media (max-width: 860px) { .demo { grid-template-columns: 1fr; } }
 .player { background: linear-gradient(165deg, #2231C9, #151542 45%, #0C0C14); border-radius: 28px; padding: 22px; display: grid; gap: 14px; box-shadow: 0 0 0 1px var(--line-2); transition: filter .4s; }
-.player .surface { font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.65); }
+.player .surface { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.8); }
 .player .row1 { display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: center; }
 .art { width: 64px; height: 64px; border-radius: 50%; background: conic-gradient(from 20deg, var(--blue), var(--pink), var(--violet), var(--blue)); position: relative; transition: filter .4s, opacity .4s; }
 .art::after { content: ""; position: absolute; inset: 24px; border-radius: 50%; background: #0C0C14; }
 .player .song { font-weight: 600; font-size: 17px; line-height: 1.25; color: #fff; }
 .player .artist { font-size: 14px; color: rgba(255,255,255,.65); }
 .player .state { font-size: 14.5px; line-height: 1.5; min-height: 4.6em; color: rgba(255,255,255,.85); }
-.badge { justify-self: start; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; background: #fff; color: #111; }
+.badge { justify-self: start; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; background: #fff; color: #111; }
 .badge.off { background: transparent; color: rgba(255,255,255,.6); box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); }
 .player.dim { filter: saturate(0) brightness(.8); }
 .gantt { display: grid; gap: 10px; }
@@ -336,12 +344,23 @@ input[type="range"] { width: 100%; accent-color: var(--small); }
 .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); }
 table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
 th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+th { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 tr:last-child td { border-bottom: 0; }
 td { color: var(--ink-2); }
 td:first-child { color: var(--ink); font-weight: 500; min-width: 170px; }
 tr.pick td { background: #1C1726; }
 tr.pick td:last-child { color: var(--small); font-weight: 600; }
+/* phones: each table row becomes a stacked card, labelled with its column names */
+@media (max-width: 640px) {
+  .tbl thead { display: none; }
+  .tbl table, .tbl tbody, .tbl tr, .tbl td { display: block; width: 100%; }
+  .tbl tr { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .tbl tr:last-child { border-bottom: 0; }
+  .tbl td, .tbl td:first-child { padding: 0; border: 0; min-width: 0; background: none; }
+  .tbl td + td { margin-top: 6px; }
+  .tbl tr.pick { background: #1C1726; }
+  .tbl td[data-label]::before { content: attr(data-label) " · "; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+}
 
 /* workflow snake */
 .flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 26px; position: relative; }
@@ -446,7 +465,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   </div>
   <div class="listen" id="listen">
     <div class="embed" id="embed"><p class="fallback">Loading the Spotify player…</p></div>
-    <p class="credit"><span id="credit-now"></span> A 5-song queue: two of Ena's picks and three lesser-known artists from the sample. Skip one in under 30 seconds and the phone marks it, the same way this study counts a skip. Through Spotify's own player. Logged-out visitors, and most phones, hear a preview: tap <b>Full song ↗</b> on the phone to play the whole track in Spotify.</p>
+    <p class="credit"><span id="credit-now"></span> Five songs: two of Ena's picks, then three lesser-known artists from the sample. Skip one in under 30 seconds and the phone marks it as a skip, the way this study counts one. Phones and logged-out visitors hear a preview, so <b>Full song ↗</b> opens the whole track in Spotify.</p>
   </div>
 </header>
 
@@ -1000,7 +1019,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
       actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume();
       if (!noiseBuf) { noiseBuf = actx.createBuffer(1, actx.sampleRate, actx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
     } catch (e) { document.getElementById('hear-note').textContent = 'Sound is not available in this browser.'; return; }
-    if (ctrl && playingNow) ctrl.pause();
+    if (playingNow || wantPlay) pausePhone();
     bus = makeBus(); playing = true; hearLabel.textContent = 'Stop';
     const t0 = actx.currentTime + .12;
     drumsBar(t0, false); bassBar(t0, ROOTS[0]);                     // intro bar: kick, hats, bass
@@ -1018,7 +1037,10 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   }
   hearBtn.onclick = hear;
 
-  // ---------- hero phone: a 4-song queue through Spotify's iFrame API ----------
+  // ---------- hero phone: a 5-song queue through Spotify's iFrame API ----------
+  // Loading a new song into a Spotify player rebuilds it (1–3 s) and holds any "play" until it's
+  // ready, too late for an iPhone to count it as a tap. So every song gets its own player, loaded
+  // in the background one after another, and skipping just starts the next one inside the tap.
   const CDN = 'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02';
   const QUEUE = [
     { id: '3USDaKxyFcwD6ehOYowW2j', t: 'Moja', a: 'Dlala Thukzin, Zeh McGeba, MK Productions', cover: CDN + '753bd171a42d4c9e8ef2530e', note: "Ena's pick" },
@@ -1027,87 +1049,152 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     { id: '611y0fYELYaLtjiMKbxO4N', t: 'Folake', a: 'taves', cover: CDN + '678ee91c94decd399d65d8b6', note: 'Lesser-known, from the sample' },
     { id: '3GKP5FZ3p29o082QOwIEiu', t: 'Cameras', a: 'SuperJazzClub', cover: CDN + '717be9c8c3f0ded5635cc597', note: 'Lesser-known, from the sample' }
   ];
-  let qi = 0, lastPos = 0, started = false, playingNow = false;
+  const PLAY_D = 'M4 2.5v11l9-5.5z', PAUSE_D = 'M4 2.5h3v11H4zM9 2.5h3v11H9z';
   const npT = document.getElementById('np-t'), npA = document.getElementById('np-a'), npQ = document.getElementById('np-q');
   const pill = document.getElementById('pill'), creditNow = document.getElementById('credit-now'), vinyl = document.querySelector('.vinyl');
-  const trackUrl = () => 'https://open.spotify.com/track/' + QUEUE[qi].id;
   const phone = document.querySelector('.phone'), ppIcon = document.getElementById('pp-icon'), ppBtn = document.getElementById('phone-play');
-  const embed = document.getElementById('embed'), listen = document.getElementById('listen');
+  const embed = document.getElementById('embed'), keep = document.getElementById('np-keep');
   const tPos = document.getElementById('t-pos'), tDur = document.getElementById('t-dur'), waveBars = [...wave.children];
   const mmss = ms => { const t = Math.floor(ms / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
-  let ctrl = null, gotUpdate = false;
+  const trackUrl = () => 'https://open.spotify.com/track/' + QUEUE[qi].id;
+
+  const slots = [], ctrls = [], ready = [], begun = [];   // per song: its player and whether it has been played
+  let api = null, apiFailed = false, qi = 0, started = false, playingNow = false, wantPlay = false;
+  let durMs = 0, lastUpdateAt = 0, statusText = '';
+  let intent = null, intentUntil = 0, playReqAt = 0, confirmed = false;
+
+  // our own clock, so time and waveform move even when Spotify reports nothing (some phones)
+  let clockBase = 0, clockStart = 0;
+  const nowPos = () => clockStart ? clockBase + (performance.now() - clockStart) : clockBase;
+  function clockSet(ms) { clockBase = ms; if (clockStart) clockStart = performance.now(); }
+
   function setPlaying(on) {
+    if (on && !clockStart) clockStart = performance.now();
+    if (!on && clockStart) { clockBase = nowPos(); clockStart = 0; }
+    playingNow = on; if (on) started = true;
     phone.classList.toggle('playing', on); wave.classList.toggle('on', on && !reduce);
-    ppIcon.setAttribute('d', on ? 'M4 2.5h3v11H4zM9 2.5h3v11H9z' : 'M4 2.5v11l9-5.5z');
-    ppBtn.setAttribute('aria-label', (on ? 'Pause ' : 'Play ') + QUEUE[qi].t); playingNow = on; if (on) started = true;
+    ppIcon.setAttribute('d', on ? PAUSE_D : PLAY_D);
+    ppBtn.setAttribute('aria-label', (on ? 'Pause ' : 'Play ') + QUEUE[qi].t);
   }
-  function fallback() {
-    if (ctrl) return;
-    embed.innerHTML = '<p class="fallback">The Spotify player can\'t load here. <a href="' + trackUrl() + '">Listen to ' + QUEUE[qi].t + ' on Spotify</a>.</p>';
-  }
-  window.onSpotifyIframeApiReady = api => {
-    const host = document.createElement('div'); embed.innerHTML = ''; embed.appendChild(host);
-    api.createController(host, { uri: 'spotify:track:' + QUEUE[qi].id, width: '100%', height: 152, theme: 'dark' }, c => {
-      ctrl = c;
+  function setLoading(on) { ppBtn.classList.toggle('loading', on); statusText = on ? 'Loading…' : ''; }
+
+  function makePlayer(i) {
+    if (!api || slots[i]) return;
+    const slot = document.createElement('div'), host = document.createElement('div');
+    slot.className = 'slot' + (i === qi ? ' on' : ''); slot.appendChild(host); embed.appendChild(slot); slots[i] = slot;
+    api.createController(host, { uri: 'spotify:track:' + QUEUE[i].id, width: '100%', height: 152, theme: 'dark' }, c => {
+      ctrls[i] = c;
+      // Spotify marks its player lazy, so on phones it may not load until scrolled to; we need it now
+      const f = slot.querySelector('iframe'); if (f) f.setAttribute('loading', 'eager');
+      c.addListener('ready', () => {
+        ready[i] = true;
+        if (i === qi && wantPlay) startSong(true);
+        preloadNext();
+      });
       c.addListener('playback_update', e => {
-        gotUpdate = true; const d = e.data; lastPos = d.position || 0;
-        setPlaying(!d.isPaused && !d.isBuffering);
-        if (started && d.isPaused && d.duration && d.position >= d.duration - 1500) showKeep();
-        if (d.duration) {
-          tPos.textContent = mmss(d.position); tDur.textContent = mmss(d.duration);
-          const f = d.position / d.duration; waveBars.forEach((b, i) => b.classList.toggle('past', i / waveBars.length < f));
-        }
+        const d = e.data || {};
+        if (i === qi) onUpdate(d);
+        else if (!d.isPaused) c.pause();            // never two songs at once
       });
     });
-  };
-  const api = document.createElement('script'); api.src = 'https://open.spotify.com/embed/iframe-api/v1'; api.async = true;
-  api.onerror = fallback; document.body.appendChild(api);
-  setTimeout(fallback, 6000);
-  // when the preview ends, offer the full song in the Spotify app
-  const keep = document.getElementById('np-keep'), coarse = matchMedia('(pointer: coarse)').matches;
-  let keepTimer;
+    setTimeout(preloadNext, 5000);                    // keep loading even if one player is slow to report ready
+  }
+  function preloadNext() {
+    for (let k = 1; k < QUEUE.length; k++) { const j = (qi + k) % QUEUE.length; if (!slots[j]) { makePlayer(j); return; } }
+  }
+
+  // ask the current song's player to play; fromStart restarts it, otherwise it carries on
+  function startSong(fromStart) {
+    const i = qi, c = ctrls[i];
+    if (!c || !ready[i]) { wantPlay = true; setLoading(!apiFailed); if (apiFailed) noPlayer(); return; }
+    wantPlay = false; setLoading(false); hideKeep();
+    intent = true; intentUntil = performance.now() + 2500; playReqAt = performance.now(); confirmed = false;
+    if (!begun[i]) c.play();
+    else if (fromStart || begun[i] === 'ended') { clockSet(0); c.restart(); }
+    else c.resume();
+    begun[i] = true;
+    setPlaying(true);                                  // answer the tap straight away
+    setTimeout(() => {
+      // Spotify answered but never said "playing": the browser blocked the sound
+      if (i === qi && playingNow && !confirmed && lastUpdateAt > playReqAt) { setPlaying(false); flashPill('Tap play again'); }
+    }, 2800);
+  }
+  function pausePhone() {
+    wantPlay = false; setLoading(false);
+    intent = false; intentUntil = performance.now() + 1500;
+    if (ctrls[qi] && ready[qi]) ctrls[qi].pause();
+    setPlaying(false);
+  }
+  function onUpdate(d) {
+    lastUpdateAt = performance.now();
+    if (d.duration > 0) durMs = d.duration;
+    if (d.position > 0) clockSet(d.position);
+    const isPlaying = !d.isPaused;                     // buffering still counts as playing: no icon flicker
+    if (isPlaying) { confirmed = true; if (!begun[qi]) begun[qi] = true; }
+    if (performance.now() < intentUntil && isPlaying !== intent) return;   // a report from before the tap
+    if (d.isPaused && durMs && d.position >= durMs - 1500) { if (playingNow) songEnded(); return; }
+    if (isPlaying !== playingNow) setPlaying(isPlaying);
+  }
+  function songEnded() {
+    setPlaying(false); begun[qi] = 'ended'; clockSet(durMs || nowPos());
+    if (!durMs || durMs <= 31000) showKeep();          // a preview ran out: offer the full song
+  }
+
   function showKeep() { keep.href = trackUrl(); keep.hidden = false; }
-  function hideKeep() { keep.hidden = true; clearTimeout(keepTimer); }
-  // phones may not report progress, so they also get a local timer matching the ~30s preview
-  function armKeep() { clearTimeout(keepTimer); if (coarse) keepTimer = setTimeout(showKeep, 31000); }
+  function hideKeep() { keep.hidden = true; }
+  let pillTimer;
+  function flashPill(text) {
+    clearTimeout(pillTimer); pill.textContent = text; pill.classList.add('skipped');
+    pillTimer = setTimeout(() => { pill.textContent = 'First listen · lean-back'; pill.classList.remove('skipped'); }, 2600);
+  }
+  function noPlayer() { flashPill('No player here · tap Full song ↗'); }
+
   function showTrack() {
     const q = QUEUE[qi];
     npT.textContent = q.t; npA.textContent = q.a; npQ.textContent = (qi + 1) + ' of ' + QUEUE.length + ' · ' + q.note;
     vinyl.style.setProperty('--cover', 'url("' + q.cover + '")');
     creditNow.innerHTML = 'Now playing: <a href="' + trackUrl() + '">' + q.t + '</a> by ' + q.a + '.';
     document.getElementById('np-open').href = trackUrl();
-    tPos.textContent = '0:00'; tDur.textContent = started ? '' : 'Press play'; waveBars.forEach(b => b.classList.remove('past'));
+    slots.forEach((sl, k) => sl && sl.classList.toggle('on', k === qi));
     ppBtn.setAttribute('aria-label', 'Play ' + q.t);
-  }
-  let pillTimer;
-  function flashPill(text) {
-    clearTimeout(pillTimer); pill.textContent = text; pill.classList.add('skipped');
-    pillTimer = setTimeout(() => { pill.textContent = 'First listen · lean-back'; pill.classList.remove('skipped'); }, 2600);
+    if (!api && apiFailed) showFallback();
   }
   function stepQueue(step) {
     // a skip in this study = ended by pressing next, or played for under 30 seconds
-    if (step > 0 && started && lastPos < 30000) flashPill('Skipped · under 30s');
-    else if (step > 0 && started) flashPill('Next · not a skip after 30s');
-    const wasPlaying = playingNow;
-    qi = (qi + step + QUEUE.length) % QUEUE.length; lastPos = 0; hideKeep(); showTrack();
-    if (ctrl && (started || wasPlaying)) armKeep();
-    if (ctrl) {
-      ctrl.loadUri('spotify:track:' + QUEUE[qi].id);
-      if (started || wasPlaying) { ctrl.play(); setTimeout(() => { if (!playingNow) ctrl.play(); }, 900); }
-    }
-    else fallback();
+    if (step > 0 && started) flashPill(nowPos() < 30000 ? 'Skipped · under 30s' : 'Next · not a skip after 30s');
+    const keepGoing = playingNow || wantPlay || started;
+    if (ctrls[qi] && ready[qi] && playingNow) ctrls[qi].pause();
+    setPlaying(false); wantPlay = false; setLoading(false); hideKeep();
+    qi = (qi + step + QUEUE.length) % QUEUE.length;
+    durMs = 0; clockBase = 0; clockStart = 0;
+    showTrack(); makePlayer(qi);
+    if (keepGoing) startSong(true);                    // the next song starts inside this same tap
   }
   document.getElementById('np-next').onclick = () => stepQueue(1);
   document.getElementById('np-prev').onclick = () => stepQueue(-1);
-  showTrack();
+  ppBtn.onclick = () => { if (playingNow || wantPlay) pausePhone(); else startSong(false); };
 
-  ppBtn.onclick = () => {
-    if (!ctrl) { fallback(); listen.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); return; }
-    if (playingNow) clearTimeout(keepTimer); else { hideKeep(); armKeep(); }
-    gotUpdate = false; ctrl.togglePlay();
-    // some browsers only allow the first play from inside Spotify's own player
-    setTimeout(() => { if (!gotUpdate) { listen.classList.add('nudge'); tDur.textContent = 'Tap play below'; setTimeout(() => listen.classList.remove('nudge'), 2500); } }, 1500);
-  };
+  // time, waveform and the preview-over fallback, from our own clock
+  setInterval(() => {
+    const pos = nowPos(), dur = durMs || 30000;
+    tPos.textContent = mmss(Math.min(pos, dur));
+    tDur.textContent = statusText || (durMs ? mmss(durMs) : (started ? '' : 'Press play'));
+    const f = Math.min(1, pos / dur);
+    waveBars.forEach((b, i) => b.classList.toggle('past', i / waveBars.length < f));
+    if (playingNow && performance.now() - lastUpdateAt > 3000 && pos > dur + 800) songEnded();
+  }, 250);
+
+  function showFallback() {
+    if (api) return;
+    embed.innerHTML = '<p class="fallback">The Spotify player can\'t load here. <a href="' + trackUrl() + '">Listen to ' + QUEUE[qi].t + ' on Spotify</a>.</p>';
+    if (wantPlay) { wantPlay = false; setLoading(false); }
+  }
+  window.onSpotifyIframeApiReady = a => { api = a; embed.innerHTML = ''; makePlayer(qi); };
+  const spApi = document.createElement('script'); spApi.src = 'https://open.spotify.com/embed/iframe-api/v1'; spApi.async = true;
+  spApi.onerror = () => { apiFailed = true; showFallback(); if (ppBtn.classList.contains('loading')) { setLoading(false); noPlayer(); } };
+  document.body.appendChild(spApi);
+  setTimeout(showFallback, 15000);
+  showTrack();
 
   // ---------- A4: 1,000-dot fields ----------
   const FIELDS = {
@@ -1221,6 +1308,11 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   document.getElementById('m-prev').onclick = () => { const c = current(); c <= 0 ? scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }) : go(secs[c - 1]); };
 
   // ---------- boot ----------
+  // label table cells with their column names, for the stacked phone layout (2-column tables don't need it)
+  document.querySelectorAll('.tbl table').forEach(t => {
+    const heads = [...t.querySelectorAll('thead th')].map(th => th.textContent.trim());
+    if (heads.length > 2) t.querySelectorAll('tbody tr').forEach(tr => [...tr.children].forEach((td, i) => { if (i) td.dataset.label = heads[i]; }));
+  });
   // always start at the top on load or refresh, even after following a section link
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   try { if (location.hash) history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
