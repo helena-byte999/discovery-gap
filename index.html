@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Discovery Gap</title>
+<meta name="description" content="Lesser-known artists get a fair first listen on Spotify. They just don't get a second one. A product case study by Ena.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,300..900&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* A deliberately single, dark look: every colour is set explicitly here. */
+:root {
+  color-scheme: dark;
+  --bg: #060608;
+  --panel: #101014;
+  --panel-2: #17171D;
+  --glass: rgba(34, 33, 44, .62);
+  --line: rgba(255, 255, 255, .07);
+  --line-2: rgba(255, 255, 255, .14);
+  --ink: #F4F3F8;
+  --ink-2: #A9A7B7;
+  --muted: #6E6C7C;
+  --small: #B26BFF;
+  --big: #E4E2EC;
+  --faint: #25242D;
+  --blue: #2D3BF0;
+  --violet: #7C3FF2;
+  --pink: #C84DFF;
+  --grad: linear-gradient(90deg, var(--blue), var(--violet) 55%, var(--pink));
+  --display: "Anybody", "Arial Black", system-ui, sans-serif;
+  --serif: "Instrument Serif", "Times New Roman", serif;
+  --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--bg); }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6;
+  padding-inline: 20px; padding-block: 0 110px; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  background-image: linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: calc((min(100vw, 1180px) - 40px) / 4) 100%;
+  background-position: center top;
+}
+.wrap { max-width: 1140px; margin: 0 auto; position: relative; }
+a { color: inherit; text-decoration-color: var(--line-2); text-underline-offset: 3px; }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--small); outline-offset: 3px; border-radius: 6px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.label { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.serif { font-family: var(--serif); font-weight: 400; }
+.star { width: 1em; height: 1em; display: inline-block; vertical-align: -.1em; color: var(--small); }
+.key { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: var(--ink-2); }
+.key i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.key i.s { background: var(--small); } .key i.b { background: var(--big); }
+
+/* ---------- top bar ---------- */
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 22px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.topbar nav { display: flex; gap: 22px; font-size: 14px; color: var(--ink-2); }
+.topbar nav a { text-decoration: none; }
+.topbar nav a:hover { color: var(--ink); }
+@media (max-width: 600px) { .topbar nav, .topbar > .label { display: none; } }
+
+/* ---------- hero ---------- */
+.hero { padding-block: 52px 20px; display: grid; gap: 18px; text-align: center; justify-items: center; }
+.hero h1 {
+  font-family: var(--display); font-weight: 820; text-transform: uppercase; letter-spacing: -.01em;
+  font-size: clamp(34px, 9.4vw, 126px); line-height: .9; font-variation-settings: "wdth" 125;
+}
+.hero h1 .w { display: inline-block; white-space: nowrap;
+}
+.hero h1 .ch { display: inline-block; font-variation-settings: "wdth" var(--w, 125); transition: font-variation-settings .3s ease; }
+.hero h1 .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .sub { font-family: var(--serif); font-size: clamp(24px, 3.4vw, 38px); line-height: 1.1; color: var(--ink-2); max-width: 22ch; }
+.hero .sub em { color: var(--ink); }
+
+/* stage: phone + floating glass cards */
+.stage { position: relative; width: 100%; height: 680px; margin-top: 10px; }
+.glow { position: absolute; inset: 8% 18%; background:
+  radial-gradient(40% 50% at 35% 55%, rgba(45, 59, 240, .55), transparent 70%),
+  radial-gradient(35% 45% at 68% 45%, rgba(200, 77, 255, .38), transparent 70%); filter: blur(30px); pointer-events: none; }
+.phone {
+  position: absolute; left: 50%; top: 20px; width: 300px; height: 620px; margin-left: -150px;
+  border-radius: 48px; padding: 10px; background: #1A1A1F;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 40px 90px rgba(0,0,0,.7), inset 0 0 0 2px #2A2A31;
+}
+.screen { position: relative; height: 100%; border-radius: 39px; overflow: hidden; background: linear-gradient(170deg, #2433D8 0%, #1A1B5E 38%, #0A0A12 70%); display: grid; grid-template-rows: auto auto 1fr auto; padding: 16px 20px 22px; gap: 12px; text-align: left; }
+.status { display: flex; justify-content: space-between; font: 600 13px var(--body); color: #fff; padding-inline: 8px; }
+.island { position: absolute; top: 12px; left: 50%; width: 92px; height: 26px; margin-left: -46px; background: #000; border-radius: 20px; }
+.screen .bar-t { display: flex; justify-content: space-between; align-items: center; color: #fff; font-size: 13.5px; opacity: .9; }
+.vinyl { align-self: center; justify-self: center; width: 200px; height: 200px; border-radius: 50%; position: relative;
+  background: repeating-radial-gradient(circle, #0c0c10 0 2px, #16161c 2px 4px); box-shadow: 0 20px 50px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08);
+  animation: spin 9s linear infinite; }
+.vinyl::before { content: ""; position: absolute; inset: 62px; border-radius: 50%; background: conic-gradient(from 30deg, var(--blue), var(--pink), var(--violet), var(--blue)); }
+.vinyl::after { content: ""; position: absolute; inset: 94px; border-radius: 50%; background: #0A0A12; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.np { display: grid; gap: 10px; color: #fff; }
+.np .pill { justify-self: center; font-size: 12px; padding: 5px 11px; border-radius: 999px; background: rgba(255,255,255,.1); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+.np .t { text-align: center; font-size: 19px; font-weight: 500; line-height: 1.2; }
+.np .a { text-align: center; font-size: 13px; opacity: .6; margin-top: -8px; }
+.ctrl { display: flex; justify-content: center; align-items: center; gap: 26px; }
+.ctrl svg { width: 18px; height: 18px; fill: #fff; }
+.ctrl .play { width: 54px; height: 54px; border-radius: 50%; border: 0; background: rgba(255,255,255,.1); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); display: grid; place-items: center; cursor: pointer; color: #fff; }
+.wave { display: flex; align-items: flex-end; gap: 2px; height: 42px; }
+.wave i { flex: 1; background: #fff; border-radius: 1px; height: 100%; transform-origin: bottom; transform: scaleY(var(--h, .4)); opacity: .9; }
+.wave.on i { animation: bounce var(--d, .9s) ease-in-out infinite alternate; }
+.wave i.past { opacity: .35; }
+@keyframes bounce { from { transform: scaleY(calc(var(--h) * .35)); } to { transform: scaleY(var(--h)); } }
+.times { display: flex; justify-content: space-between; font: 11px var(--mono); color: rgba(255,255,255,.55); margin-top: -4px; }
+
+.float { position: absolute; will-change: transform; }
+.float > .card { animation: bob 6s ease-in-out infinite alternate; }
+.float:nth-of-type(2n) > .card { animation-duration: 7.5s; animation-delay: -2s; }
+@keyframes bob { from { transform: translateY(-8px); } to { transform: translateY(8px); } }
+.card { text-align: left; background: var(--glass); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--line-2); border-radius: 22px; padding: 18px 20px; display: grid; gap: 10px; box-shadow: 0 20px 50px rgba(0,0,0,.35); }
+.card .tag { justify-self: start; font-size: 13.5px; padding: 5px 12px; border-radius: 9px; background: rgba(255,255,255,.1); }
+.card p { font-size: 15px; line-height: 1.55; color: #D6D4E0; }
+.card.chipc { padding: 12px 14px; border-radius: 16px; gap: 4px; }
+.card.chipc .big-n { font-family: var(--display); font-size: 30px; font-weight: 750; font-variation-settings: "wdth" 110; line-height: 1; font-variant-numeric: tabular-nums; }
+.card.chipc .row { display: flex; align-items: center; gap: 10px; }
+.card.chipc .orb { width: 34px; height: 34px; border-radius: 8px; background: conic-gradient(from 90deg, var(--pink), var(--blue), var(--pink)); flex: none; }
+.card.chipc small { font-size: 12px; color: var(--ink-2); }
+.f-problem { left: 2%; top: 190px; width: 300px; }
+.f-solution { right: 1%; top: 400px; width: 310px; }
+.f-track { left: 13%; top: 60px; }
+.f-stick { right: 5%; top: 110px; width: 230px; }
+.f-ten { left: 6%; top: 520px; width: 220px; }
+@media (max-width: 900px) {
+  .stage { height: auto; display: grid; gap: 14px; justify-items: center; }
+  .glow { inset: 0; }
+  .phone { position: relative; left: auto; top: auto; margin: 0; }
+  .float { position: static; width: auto !important; max-width: 100%; justify-self: stretch; transform: none !important; }
+  .f-track, .f-ten, .f-stick { display: none; }
+}
+
+/* stats row */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 1px solid var(--line); margin-top: 56px; }
+.stat { padding: 30px 20px 26px; display: grid; gap: 10px; align-content: start; }
+.stat + .stat { border-left: 1px solid var(--line); }
+.stat .n { font-family: var(--display); font-weight: 820; font-size: clamp(40px, 6vw, 76px); line-height: .9; font-variation-settings: "wdth" 125; font-variant-numeric: tabular-nums; }
+@media (max-width: 760px) { .stats { grid-template-columns: 1fr 1fr; } .stat:nth-child(3) { border-left: 0; } .stat:nth-child(n+3) { border-top: 1px solid var(--line); } }
+
+/* marquee ribbons */
+.ribbons { position: relative; height: 300px; margin-inline: -20px; overflow: hidden; }
+.ribbon { position: absolute; left: -10%; width: 120%; background: #1B1B21; border-block: 1px solid var(--line-2); overflow: hidden; white-space: nowrap; }
+.ribbon.r1 { top: 70px; transform: rotate(-7deg); }
+.ribbon.r2 { top: 150px; transform: rotate(4deg); background: #232329; z-index: 1; }
+.ribbon .track { display: inline-flex; align-items: center; gap: 44px; padding-block: 14px; animation: slide 28s linear infinite; }
+.ribbon.r2 .track { animation-direction: reverse; animation-duration: 34s; }
+.ribbon span { font-family: var(--display); font-size: clamp(34px, 5vw, 60px); font-weight: 420; font-variation-settings: "wdth" 138; color: #ECEAF3; line-height: 1; }
+.ribbon .star { width: 38px; height: 38px; }
+@keyframes slide { to { transform: translateX(-50%); } }
+
+/* contents */
+.contents { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 24px; background: var(--panel); overflow: hidden; }
+.contents .side { padding: 26px 28px; display: grid; gap: 4px; align-content: start; }
+.contents .side + .side { border-left: 1px solid var(--line); }
+.contents .side > .label { margin-bottom: 10px; }
+.trk { display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; padding: 12px 12px; margin-inline: -12px; border-radius: 12px; text-decoration: none; align-items: center; transition: background .2s; }
+.trk:hover { background: var(--panel-2); }
+.trk .no { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.trk .t { font-weight: 600; }
+.trk .d { font-size: 13.5px; color: var(--muted); text-align: right; }
+@media (max-width: 760px) { .contents { grid-template-columns: 1fr; } .contents .side + .side { border-left: 0; border-top: 1px solid var(--line); } .trk .d { display: none; } }
+
+/* ---------- sections ---------- */
+section.sec { padding-block: 90px 40px; display: grid; gap: 34px; scroll-margin-top: 10px; }
+.sec-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; border-top: 1px solid var(--line); padding-top: 14px; font-family: var(--mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+.sec-row :last-child { text-align: right; color: var(--muted); }
+.sec-head { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px 40px; align-items: end; }
+.sec-head h2 { font-family: var(--display); text-transform: uppercase; font-weight: 820; font-size: clamp(40px, 7vw, 92px); line-height: .92; font-variation-settings: "wdth" 118; letter-spacing: -.01em; }
+.sec-head h2 .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sec-head .lede { font-size: 19px; color: var(--ink-2); line-height: 1.55; max-width: 46ch; }
+.sec-head .lede b { color: var(--ink); font-weight: 600; }
+@media (max-width: 820px) { .sec-head { grid-template-columns: 1fr; } }
+.prose { display: grid; gap: 14px; color: var(--ink-2); max-width: 66ch; }
+.prose b { color: var(--ink); }
+
+/* method tree */
+.tree { display: grid; grid-template-columns: 220px 1fr; gap: 0; align-items: start; }
+.root { background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 22px; padding: 18px 20px; display: grid; gap: 6px; position: relative; }
+.root b { font-size: 18px; font-weight: 500; }
+.root span { font-size: 14px; color: var(--ink-2); }
+.branches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding-top: 34px; position: relative; margin-top: 28px; }
+.branches::before { content: ""; position: absolute; top: 0; left: -40px; right: calc(12.5% - 7px); height: 1px; background: var(--line-2); }
+.branch { display: grid; gap: 8px; position: relative; align-content: start; }
+.branch::before { content: ""; position: absolute; top: -34px; left: 50%; width: 1px; height: 34px; background: var(--line-2); }
+.node { justify-self: center; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 999px; padding: 10px 18px; font-size: 15px; }
+.node.head { background: #1F1F27; color: var(--ink); font-weight: 500; margin-bottom: 20px; position: relative; }
+.node.head::after { content: ""; position: absolute; top: 100%; left: 50%; width: 1px; height: 20px; background: var(--line-2); }
+.node.leaf { color: var(--ink-2); font-size: 14px; text-align: center; border-radius: 16px; }
+@media (max-width: 900px) { .tree { grid-template-columns: 1fr; } .branches { grid-template-columns: 1fr 1fr; margin-top: 0; } .branches::before, .branch::before { display: none; } .node.head::after { display: none; } .node.head { margin-bottom: 4px; } }
+
+/* hypothesis cards */
+.hyps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .hyps { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .hyps { grid-template-columns: 1fr; } }
+.hyp { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 20px; display: grid; gap: 14px; align-content: space-between; min-height: 170px; }
+.hyp p { font-size: 15.5px; line-height: 1.45; }
+.chip { justify-self: start; font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--ink-2); }
+.chip.yes { background: var(--grad); color: #fff; border-color: transparent; }
+
+/* panels + charts */
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; padding: 24px 26px 22px; display: grid; gap: 16px; }
+.panel-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.panel-title { font-size: 18px; font-weight: 500; }
+.panel-sub { font-size: 13px; color: var(--muted); }
+.seg { display: inline-flex; border-radius: 999px; padding: 4px; gap: 2px; background: var(--panel-2); box-shadow: inset 0 0 0 1px var(--line-2); }
+.seg button { font: 500 13.5px/1 var(--body); border: 0; background: transparent; color: var(--ink-2); padding: 9px 15px; border-radius: 999px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.btn { font: 600 14px/1 var(--body); display: inline-flex; align-items: center; gap: 10px; border: 0; background: var(--grad); color: #fff; border-radius: 999px; padding: 11px 18px 11px 13px; cursor: pointer; }
+.btn.ghost { background: var(--panel-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-2); padding-left: 16px; }
+.btn svg { width: 15px; height: 15px; fill: currentColor; }
+.chart { width: 100%; overflow-x: auto; }
+.chart svg { display: block; width: 100%; height: auto; min-width: 460px; }
+.chart text { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
+.chart .lbl { fill: var(--ink-2); }
+.chart .val { fill: var(--ink); font-weight: 500; }
+.chart .hl { fill: var(--panel-2); opacity: 0; transition: opacity .15s; }
+.chart .row.on .hl { opacity: 1; }
+.caption { font-size: 15.5px; color: var(--ink-2); max-width: 72ch; min-height: 3em; }
+.caption b { color: var(--ink); font-weight: 600; }
+.note { font-size: 13.5px; color: var(--muted); max-width: 76ch; }
+
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0; border-block: 1px solid var(--line); }
+.fig { padding: 22px 18px; display: grid; gap: 8px; align-content: start; }
+.fig + .fig { border-left: 1px solid var(--line); }
+.fig .n { font-family: var(--display); font-size: 46px; font-weight: 800; font-variation-settings: "wdth" 115; line-height: .95; font-variant-numeric: tabular-nums; }
+.fig .n small { font-size: 22px; color: var(--muted); font-weight: 500; }
+.fig p { font-size: 14px; color: var(--ink-2); line-height: 1.45; }
+@media (max-width: 700px) { .fig + .fig { border-left: 0; border-top: 1px solid var(--line); } }
+
+/* dot fields */
+.stepper { display: flex; flex-wrap: wrap; gap: 8px; }
+.stepper button { font: 500 14px/1.25 var(--body); text-align: left; border: 0; background: var(--panel-2); color: var(--ink-2); border-radius: 14px; padding: 11px 16px; cursor: pointer; display: grid; gap: 3px; box-shadow: inset 0 0 0 1px var(--line); }
+.stepper button span { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.stepper button[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 0 0 1px var(--small); background: #1C1726; }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+.field { display: grid; gap: 10px; }
+.field-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.field-h .count { font-family: var(--display); font-size: 40px; font-weight: 800; font-variation-settings: "wdth" 110; font-variant-numeric: tabular-nums; line-height: 1; }
+.field canvas { width: 100%; aspect-ratio: 40 / 25; display: block; max-width: 100%; }
+.field .sub { font-size: 13.5px; color: var(--muted); }
+@media (max-width: 640px) { .fields { grid-template-columns: 1fr; } }
+
+/* voices */
+.voices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 860px) { .voices { grid-template-columns: 1fr; } }
+.voice { background: var(--panel); border: 1px solid var(--line); border-radius: 26px; padding: 24px; display: grid; gap: 18px; align-content: start; }
+.avatar { width: 76px; height: 76px; border-radius: 50%; padding: 3px; box-shadow: 0 0 0 1px rgba(178,107,255,.5); }
+.avatar i { display: block; width: 100%; height: 100%; border-radius: 50%; }
+.voice blockquote { margin: 0; font-family: var(--serif); font-size: 28px; line-height: 1.12; }
+.voice p { font-size: 14px; color: var(--ink-2); }
+
+/* second listen demo */
+.demo { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 30px; align-items: start; }
+@media (max-width: 860px) { .demo { grid-template-columns: 1fr; } }
+.player { background: linear-gradient(165deg, #2231C9, #151542 45%, #0C0C14); border-radius: 28px; padding: 22px; display: grid; gap: 14px; box-shadow: 0 0 0 1px var(--line-2); transition: filter .4s; }
+.player .surface { font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.65); }
+.player .row1 { display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: center; }
+.art { width: 64px; height: 64px; border-radius: 50%; background: conic-gradient(from 20deg, var(--blue), var(--pink), var(--violet), var(--blue)); position: relative; transition: filter .4s, opacity .4s; }
+.art::after { content: ""; position: absolute; inset: 24px; border-radius: 50%; background: #0C0C14; }
+.player .song { font-weight: 600; font-size: 17px; line-height: 1.25; color: #fff; }
+.player .artist { font-size: 14px; color: rgba(255,255,255,.65); }
+.player .state { font-size: 14.5px; line-height: 1.5; min-height: 4.6em; color: rgba(255,255,255,.85); }
+.badge { justify-self: start; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; background: #fff; color: #111; }
+.badge.off { background: transparent; color: rgba(255,255,255,.6); box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); }
+.player.dim { filter: saturate(0) brightness(.8); }
+.gantt { display: grid; gap: 10px; }
+.g-axis { position: relative; height: 22px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.g-axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.g-axis span:first-child { transform: none; }
+.g-axis span:last-child { transform: translateX(-100%); }
+.g-body { position: relative; display: grid; gap: 8px; }
+.g-bar { position: relative; min-height: 70px; border-radius: 20px; background: var(--panel-2); box-shadow: inset 0 0 0 1px var(--line); padding: 12px 18px; display: grid; align-content: center; gap: 2px; transition: box-shadow .3s, background .3s; }
+.g-bar b { font-weight: 500; font-size: 17px; }
+.g-bar span { font-size: 13px; color: var(--muted); }
+.g-bar.hot { background: var(--grad); box-shadow: none; }
+.g-bar.hot span { color: rgba(255,255,255,.75); }
+.g-bar.on { box-shadow: inset 0 0 0 1.5px var(--small); }
+.g-head { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--ink); border-radius: 2px; pointer-events: none; transition: left .15s; }
+.g-head::before { content: ""; position: absolute; top: -4px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); }
+.slider { display: grid; gap: 8px; }
+.slider-h { display: flex; justify-content: space-between; align-items: baseline; }
+.day { font-family: var(--display); font-size: 40px; font-weight: 800; font-variation-settings: "wdth" 110; line-height: 1; font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--small); }
+.rules { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 900px) { .rules { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .rules { grid-template-columns: 1fr; } }
+.rule { border: 1px solid var(--line); border-radius: 20px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; background: var(--panel); }
+.rule ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14.5px; color: var(--ink-2); line-height: 1.45; }
+
+/* calculator */
+.calc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 34px; }
+@media (max-width: 760px) { .calc { grid-template-columns: 1fr; } }
+.knob { display: grid; gap: 8px; }
+.knob-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 15px; }
+.knob-h output { font-family: var(--mono); font-weight: 500; color: var(--small); }
+.knob .hint { font-size: 13px; color: var(--muted); }
+.outs { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.outs .fig { padding-inline: 0; border-bottom: 1px solid var(--line); }
+.outs .fig + .fig { border-left: 0; border-top: 0; }
+.presets { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+td { color: var(--ink-2); }
+td:first-child { color: var(--ink); font-weight: 500; min-width: 170px; }
+tr.pick td { background: #1C1726; }
+tr.pick td:last-child { color: var(--small); font-weight: 600; }
+
+/* workflow snake */
+.flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 26px; position: relative; }
+.step { display: grid; gap: 14px; align-content: start; position: relative; }
+.step-h { font-size: 22px; font-weight: 600; padding: 16px 22px 14px; background: var(--panel-2); border-radius: 24px 24px 0 0; border-bottom: 2px solid var(--small); }
+.step ul { margin: 0; padding: 0 22px; list-style: none; display: grid; gap: 8px; color: var(--ink-2); font-size: 15px; }
+.step:not(:last-child)::after { content: ""; position: absolute; top: 30px; right: -26px; width: 26px; height: 1px; background: var(--small); }
+@media (max-width: 760px) { .flow { grid-template-columns: 1fr; gap: 26px; } .step:not(:last-child)::after { display: none; } }
+
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+.two > div { background: var(--panel); border: 1px solid var(--line); border-radius: 24px; padding: 24px 26px; }
+.two h3 { font-family: var(--serif); font-weight: 400; font-size: 32px; margin-bottom: 14px; }
+.two ul { margin: 0; padding-left: 18px; display: grid; gap: 10px; color: var(--ink-2); font-size: 15.5px; }
+.two b { color: var(--ink); font-weight: 600; }
+
+.closer { padding-block: 110px 60px; display: grid; gap: 28px; }
+.closer h2 { font-family: var(--display); text-transform: uppercase; font-weight: 840; font-size: clamp(40px, 8.4vw, 112px); line-height: .9; font-variation-settings: "wdth" 120; }
+.closer h2 .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.closer p { font-size: 19px; color: var(--ink-2); max-width: 52ch; }
+
+footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; gap: 8px; color: var(--muted); font-size: 14px; }
+
+/* floating mini player = reading progress */
+.mini { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 10;
+  width: min(560px, calc(100vw - 24px)); background: rgba(24, 24, 31, .78); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--line-2); border-radius: 22px; padding: 10px 14px; display: grid; grid-template-columns: auto auto 1fr auto; gap: 12px; align-items: center; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+.mini .disc { width: 38px; height: 38px; border-radius: 50%; background: conic-gradient(from 0deg, var(--blue), var(--pink), var(--violet), var(--blue)); position: relative; animation: spin 6s linear infinite; }
+.mini .disc::after { content: ""; position: absolute; inset: 14px; border-radius: 50%; background: #18181F; }
+.mini .ctrls { display: flex; }
+.mini button { width: 34px; height: 34px; border-radius: 50%; border: 0; background: transparent; color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+.mini button:hover { background: rgba(255,255,255,.08); }
+.mini button svg { width: 15px; height: 15px; fill: currentColor; }
+.mini .now { display: grid; gap: 6px; min-width: 0; }
+.mini .now-t { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini .now-t .mono { color: var(--small); margin-right: 8px; font-size: 12px; }
+.pbar { height: 3px; border-radius: 2px; background: rgba(255,255,255,.12); position: relative; overflow: hidden; }
+.pbar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--grad); }
+.mini .time { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+#tip { position: fixed; z-index: 20; pointer-events: none; background: #F4F3F8; color: #111; font-size: 13px; line-height: 1.45; padding: 9px 12px; border-radius: 10px; max-width: 270px; opacity: 0; transition: opacity .12s; }
+#tip b { font-family: var(--mono); font-weight: 500; }
+
+/* scroll reveal: starts visible, only slides into place */
+.rv { transition: transform .9s cubic-bezier(.2,.7,.2,1), opacity .9s ease; }
+.rv.pre { transform: translateY(34px); opacity: .45; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .rv.pre { transform: none; opacity: 1; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="star" viewBox="0 0 40 40"><g stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M20 2v36M2 20h36M7.3 7.3l25.4 25.4M32.7 7.3L7.3 32.7M13 3.5l14 33M27 3.5l-14 33M3.5 13l33 14M36.5 13l-33 14"/></g><circle cx="20" cy="20" r="3" fill="currentColor"/></symbol>
+</svg>
+
+<div class="wrap">
+
+<div class="topbar">
+  <span class="brand"><svg class="star"><use href="#star"/></svg>Discovery Gap</span>
+  <nav><a href="#a1">Side A</a><a href="#b1">Side B</a><a href="#b4">Reflection</a></nav>
+  <span class="label">//Case study · Ena</span>
+</div>
+
+<header class="hero" id="top">
+  <span class="label">A product case study · independent, not affiliated with Spotify</span>
+  <h1 aria-label="Discovery Gap."><span class="w" data-w="Discovery"></span><br><span class="w grad" data-w="Gap."></span></h1>
+  <p class="sub">Lesser-known artists get a fair first listen. <em>They just don't get a second one.</em></p>
+
+  <div class="stage" id="stage">
+    <div class="glow" aria-hidden="true"></div>
+    <div class="phone" aria-label="A music player showing a first listen of a lesser-known artist">
+      <div class="screen">
+        <span class="island" aria-hidden="true"></span>
+        <div class="status"><span>9:41</span><span class="mono" style="font-size:11px">●●● ▮</span></div>
+        <div class="bar-t"><span>⌄</span><span>Radio</span><span>♡</span></div>
+        <div class="vinyl" aria-hidden="true"></div>
+        <div class="np">
+          <span class="pill">First listen · lean-back</span>
+          <div class="t">Song one</div>
+          <div class="a">A lesser-known artist</div>
+          <div class="ctrl">
+            <svg viewBox="0 0 16 16"><path d="M3 2h2v12H3zM14 2.5v11L6 8z"/></svg>
+            <button type="button" class="play" id="phone-play" aria-label="Hear the gap: play the 10 listeners as sound"><svg viewBox="0 0 16 16"><path d="M4 2.5v11l9-5.5z"/></svg></button>
+            <svg viewBox="0 0 16 16"><path d="M11 2h2v12h-2zM2 2.5v11L10 8z"/></svg>
+          </div>
+          <div class="times"><span>Day 0</span><span>Day 90</span></div>
+          <div class="wave on" id="wave" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="float f-track" data-depth="18"><div class="card chipc"><div class="row"><span class="orb"></span><div><div style="font-size:14.5px">A new artist</div><small>Played to the end, not skipped</small></div></div></div></div>
+    <div class="float f-problem" data-depth="30"><div class="card"><span class="tag">Problem</span><p>A liked first listen of a lesser-known artist usually leads nowhere. 84% aren't heard again within two weeks, and listeners rarely go back on their own.</p></div></div>
+    <div class="float f-stick" data-depth="22"><div class="card chipc"><small>Still played 30–90 days later</small><div class="big-n"><span style="color:var(--small)">12%</span> <span style="color:var(--muted);font-size:18px">vs</span> 19%</div><small>Lesser-known vs big artists</small></div></div>
+    <div class="float f-solution" data-depth="40"><div class="card"><span class="tag">Solution</span><p><b style="color:#fff">Second Listen.</b> After two quiet weeks, bring the artist back once, with a different song, in the radio or mix where the listener first heard them.</p></div></div>
+    <div class="float f-ten" data-depth="14"><div class="card chipc"><div class="big-n">10<span style="color:var(--muted);font-size:18px"> of 10</span></div><small>listeners show the gap · p = 0.002</small></div></div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><span class="n" data-count="1.68" data-dec="2" data-suf="M">1.68M</span><span class="label">Plays analysed</span></div>
+  <div class="stat"><span class="n" data-count="10">10</span><span class="label">Listeners' exports</span></div>
+  <div class="stat"><span class="n" data-count="4">4</span><span class="label">Interviews</span></div>
+  <div class="stat"><span class="n" data-count="30">30</span><span class="label">Artists checked by hand</span></div>
+</div>
+
+<div class="ribbons" aria-hidden="true">
+  <div class="ribbon r1"><div class="track" data-words="Problem|Findings"></div></div>
+  <div class="ribbon r2"><div class="track" data-words="Solution|Second Listen"></div></div>
+</div>
+
+<nav class="contents rv" aria-label="Contents">
+  <div class="side">
+    <span class="label">Side A · What happened</span>
+    <a class="trk" href="#a1"><span class="no">A1</span><span class="t">The hunch that failed</span><span class="d">Popularity bias?</span></a>
+    <a class="trk" href="#a2"><span class="no">A2</span><span class="t">A fair first listen</span><span class="d">No skip penalty</span></a>
+    <a class="trk" href="#a3"><span class="no">A3</span><span class="t">They don't stick</span><span class="d">10 of 10 listeners</span></a>
+    <a class="trk" href="#a4"><span class="no">A4</span><span class="t">Liked, then lost</span><span class="d">The second chance is luck</span></a>
+  </div>
+  <div class="side">
+    <span class="label">Side B · What to build</span>
+    <a class="trk" href="#b1"><span class="no">B1</span><span class="t">Second Listen</span><span class="d">The proposal</span></a>
+    <a class="trk" href="#b2"><span class="no">B2</span><span class="t">Testing it</span><span class="d">Metrics and test size</span></a>
+    <a class="trk" href="#b3"><span class="no">B3</span><span class="t">Rollout and options</span><span class="d">What I ruled out</span></a>
+    <a class="trk" href="#b4"><span class="no">B4</span><span class="t">What I learned</span><span class="d">Limits and reflection</span></a>
+  </div>
+</nav>
+
+<!-- A1 -->
+<section class="sec" id="a1" data-track="A1" data-name="The hunch that failed">
+  <div class="sec-row"><span>A1</span><span>//Approach</span><span>Four hypotheses</span></div>
+  <div class="sec-head rv">
+    <h2>The hunch that <span class="grad">failed.</span></h2>
+    <p class="lede">I expected popularity bias: big artists pushed harder, lesser-known ones skipped more. <b>The data pointed somewhere else.</b></p>
+  </div>
+  <div class="tree rv" aria-label="How the data was built">
+    <div class="root"><b>Spotify exports</b><span>10 friends, shared with consent</span><span>1.68M plays · 1.44M since Oct 2021</span></div>
+    <div class="branches">
+      <div class="branch"><span class="node head">Clean</span><span class="node leaf">Podcasts dropped</span><span class="node leaf">IP addresses never loaded</span><span class="node leaf">Spellings merged</span></div>
+      <div class="branch"><span class="node head">Size artists</span><span class="node leaf">Last.fm listeners</span><span class="node leaf">Ranked within genre</span><span class="node leaf">Deezer fans as a check</span></div>
+      <div class="branch"><span class="node head">Define moments</span><span class="node leaf">Skip: under 30s</span><span class="node leaf">Lean-back vs chosen</span><span class="node leaf">Liked, lost, stuck</span></div>
+      <div class="branch"><span class="node head">Compare</span><span class="node leaf">Within each listener</span><span class="node leaf">10,000-resample bootstrap</span><span class="node leaf">Sign test, leave-one-out</span></div>
+    </div>
+  </div>
+  <div class="hyps">
+    <div class="hyp rv"><span class="label">H1</span><p>A lesser-known artist's first listen is skipped more</p><span class="chip">Not supported</span></div>
+    <div class="hyp rv"><span class="label">H2</span><p>Spotify's lean-back introductions lean towards big artists</p><span class="chip">Not supported</span></div>
+    <div class="hyp rv"><span class="label">H3</span><p>Lesser-known artists stick less after a first listen</p><span class="chip yes">Supported · 10 of 10</span></div>
+    <div class="hyp rv"><span class="label">H4</span><p>Listeners go back on their own to new artists they liked</p><span class="chip">Rarely · 1–2%</span></div>
+  </div>
+  <p class="caption">The question changed from <b>"is discovery unfair?"</b> to <b>"why does a fair introduction lead nowhere?"</b> A single global size cut-off would have called 357 of 412 Afrobeats artists lesser-known, so artists are ranked within their own genre.</p>
+</section>
+
+<!-- A2 -->
+<section class="sec" id="a2" data-track="A2" data-name="A fair first listen">
+  <div class="sec-row"><span>A2</span><span>//Finding 1</span><span>No penalty</span></div>
+  <div class="sec-head rv">
+    <h2>A fair first <span class="grad">listen.</span></h2>
+    <p class="lede">Pool everyone's plays and lesser-known artists seem to win by 10 points. <b>Look inside each listener and the advantage mostly disappears.</b></p>
+  </div>
+  <div class="panel rv">
+    <div class="panel-top">
+      <div><div class="panel-title">Lean-back first listens that were skipped</div><div class="panel-sub">Lean-back: the song played on by itself</div></div>
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" id="f1-pooled" aria-pressed="true">All plays pooled</button>
+        <button type="button" id="f1-within" aria-pressed="false">Each listener</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap"><span class="key"><i class="s"></i>Lesser-known</span><span class="key"><i class="b"></i>Big</span><span class="key" id="f1-sizekey" hidden>Dot size = number of first listens</span></div>
+    <div class="chart" id="f1-chart"></div>
+    <p class="caption" id="f1-cap"></p>
+  </div>
+</section>
+
+<!-- A3 -->
+<section class="sec" id="a3" data-track="A3" data-name="They don't stick">
+  <div class="sec-row"><span>A3</span><span>//Finding 2</span><span>The headline</span></div>
+  <div class="sec-head rv">
+    <h2>They don't <span class="grad">stick.</span></h2>
+    <p class="lede">"Stuck" means still being played, not skipped, 30–90 days after a lean-back first listen. <b>For every single listener, big artists stuck more often.</b></p>
+  </div>
+  <div class="panel rv">
+    <div class="panel-top">
+      <div><div class="panel-title">Artists still played 30–90 days later</div><div class="panel-sub">By listener, sorted by gap</div></div>
+      <button type="button" class="btn" id="hear"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg><span>Hear the gap</span></button>
+    </div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap"><span class="key"><i class="s"></i>Lesser-known</span><span class="key"><i class="b"></i>Big</span></div>
+    <div class="chart" id="f2-chart"></div>
+    <p class="note" id="hear-note">Each listener plays two notes: lesser-known, then big. Pitch follows the stick rate, and every 10 points is one octave. The melody rises for all 10 listeners.</p>
+  </div>
+  <div class="figs rv">
+    <div class="fig"><span class="n">12<small>%</small> <small>vs</small> 19<small>%</small></span><p>Lesser-known vs big artists that stuck, all plays pooled</p></div>
+    <div class="fig"><span class="n">8.8<small>pts</small></span><p>Median gap within each listener</p></div>
+    <div class="fig"><span class="n">10<small>/10</small></span><p>Listeners show it. Sign test p = 0.002</p></div>
+    <div class="fig"><span class="n">5.9–9.3</span><p>The gap when any one listener is left out</p></div>
+  </div>
+</section>
+
+<!-- A4 -->
+<section class="sec" id="a4" data-track="A4" data-name="Liked, then lost">
+  <div class="sec-row"><span>A4</span><span>//Finding 3</span><span>Liked but lost</span></div>
+  <div class="sec-head rv">
+    <h2>Liked, then <span class="grad">lost.</span></h2>
+    <p class="lede">Follow 1,000 first listens the listener liked: played through, not skipped. <b>Step through what happens next.</b></p>
+  </div>
+  <div class="panel rv">
+    <div class="stepper" role="group" aria-label="Time after the first listen">
+      <button type="button" data-stage="0" aria-pressed="true"><span>Day 0</span>A liked first listen</button>
+      <button type="button" data-stage="1" aria-pressed="false"><span>Days 1–14</span>Not heard again</button>
+      <button type="button" data-stage="2" aria-pressed="false"><span>Days 30–90</span>A different song gets played</button>
+    </div>
+    <div class="fields">
+      <div class="field">
+        <div class="field-h"><span class="key"><i class="s"></i>Lesser-known artists</span><span class="count" id="c-small" style="color:var(--small)">1,000</span></div>
+        <canvas id="fs" role="img" aria-label="1,000 liked lesser-known first listens"></canvas>
+        <span class="sub" id="s-small"></span>
+      </div>
+      <div class="field">
+        <div class="field-h"><span class="key"><i class="b"></i>Big artists</span><span class="count" id="c-big">1,000</span></div>
+        <canvas id="fb" role="img" aria-label="1,000 liked big-artist first listens"></canvas>
+        <span class="sub" id="s-big"></span>
+      </div>
+    </div>
+    <p class="caption" id="ff-cap"></p>
+    <p class="note">Leaves out the one listener whose background listening makes "liked" unreliable. Under the proposed trigger rules the figure is 3.3% against 7.1%. The gap holds within all 10 listeners (median 5 points, p = 0.002). This is correlation, not proof: that's what the experiment is for.</p>
+  </div>
+  <div class="figs rv">
+    <div class="fig"><span class="n">1.0<small>%</small></span><p>of liked lesser-known first listens got a click back from the listener (1.9% for big)</p></div>
+    <div class="fig"><span class="n">17.4<small>/21.5</small></span><p>points of lean-back returns were the same song replaying</p></div>
+    <div class="fig"><span class="n">7.5<small>%</small> <small>vs</small> 24<small>%</small></span><p>Even when lesser-known artists came back, few reached a different song</p></div>
+  </div>
+  <div class="voices">
+    <div class="voice rv"><span class="avatar"><i style="background:radial-gradient(circle at 30% 30%, #C84DFF, #2D3BF0)"></i></span><blockquote>"Would even give me more reason to go."</blockquote><p>An interviewee on a low listener count. All four said a small count doesn't put them off.</p></div>
+    <div class="voice rv"><span class="avatar"><i style="background:radial-gradient(circle at 60% 35%, #7C3FF2, #0C0C14)"></i></span><blockquote>"Another popular" one.</blockquote><p>A self-described loyal listener, on what they want after a popular song. A lead, not evidence: I'd raised popularity bias myself.</p></div>
+    <div class="voice rv"><span class="avatar"><i style="background:radial-gradient(circle at 40% 70%, #2D3BF0, #C84DFF)"></i></span><blockquote>"At the very least, I'm likely to click on it."</blockquote><p>On a new artist framed as similar to one they love. Also a lead, answering an example I gave.</p></div>
+  </div>
+</section>
+
+<div class="ribbons" aria-hidden="true" style="height:220px">
+  <div class="ribbon r1" style="top:60px"><div class="track" data-words="Side B|What to build"></div></div>
+</div>
+
+<!-- B1 -->
+<section class="sec" id="b1" data-track="B1" data-name="Second Listen">
+  <div class="sec-row"><span>B1</span><span>//Proposal</span><span>No new screens</span></div>
+  <div class="sec-head rv">
+    <h2>Second <span class="grad">Listen.</span></h2>
+    <p class="lede">When a liked lesser-known artist hasn't come back after two weeks, bring them back once, <b>with a different song</b>, in the radio, autoplay or mix where the listener first heard them.</p>
+  </div>
+  <div class="panel demo rv">
+    <div class="player" id="player">
+      <span class="surface" id="p-surface">Radio · after a song you played</span>
+      <div class="row1">
+        <div class="art" aria-hidden="true"></div>
+        <div><div class="song" id="p-song">Song one</div><div class="artist">A lesser-known artist</div></div>
+      </div>
+      <span class="badge" id="p-badge">Played to the end</span>
+      <p class="state" id="p-state"></p>
+    </div>
+    <div class="gantt">
+      <div class="slider">
+        <div class="slider-h"><span class="label">Drag through the 90 days</span><span class="day" id="tl-day">Day 0</span></div>
+        <input type="range" id="tl" min="0" max="90" value="0" step="1" aria-label="Days since the first listen">
+      </div>
+      <div class="g-axis" aria-hidden="true"><span style="left:0">Day 0</span><span style="left:15.56%">14</span><span style="left:33.33%">30</span><span style="left:100%">90</span></div>
+      <div class="g-body" id="g-body">
+        <div class="g-bar" data-from="0" data-to="1" style="margin-left:0;width:22%"><b>First listen</b><span>Liked · lean-back</span></div>
+        <div class="g-bar" data-from="1" data-to="14" style="margin-left:1.1%;width:36%"><b>Lost</b><span>No play for 14 days</span></div>
+        <div class="g-bar hot" data-from="14" data-to="30" style="margin-left:15.56%;width:40%"><b>Second Listen</b><span>One boost · a different song</span></div>
+        <div class="g-bar" data-from="30" data-to="90" style="margin-left:33.33%;width:66.67%"><b>Readout</b><span>Does a third song get played?</span></div>
+        <span class="g-head" id="g-head" style="left:0"></span>
+      </div>
+    </div>
+  </div>
+  <div class="rules">
+    <div class="rule rv"><span class="label">Trigger</span><ul><li>A lean-back first listen of a lesser-known artist, played to the end</li><li>No play of that artist in the next 14 days</li></ul></div>
+    <div class="rule rv"><span class="label">Excluded</span><ul><li>Sleep and background contexts</li><li>Discovery Mode placements</li><li>Unverified artists, or 1–2 songs only</li></ul></div>
+    <div class="rule rv"><span class="label">Limits</span><ul><li>One try per artist, at most 2 a week</li><li>Fewer for loyal listeners</li><li>"Hide" removes the artist</li></ul></div>
+    <div class="rule rv"><span class="label">v2, if v1 works</span><ul><li>A reason line: "You listened to X two weeks ago"</li><li>An anchor: "with Y"</li><li>Test in Discover Weekly</li></ul></div>
+  </div>
+</section>
+
+<!-- B2 -->
+<section class="sec" id="b2" data-track="B2" data-name="Testing it">
+  <div class="sec-row"><span>B2</span><span>//Measurement</span><span>A/B test</span></div>
+  <div class="sec-head rv">
+    <h2>Testing <span class="grad">it.</span></h2>
+    <p class="lede">Randomised by listener. <b>Primary metric:</b> of triggered artists, the share where the listener plays a different song by them in days 30–90. Baseline 3.3%.</p>
+  </div>
+  <div class="panel rv">
+    <div class="panel-top">
+      <div class="panel-title">What would it take, and what would it be worth?</div>
+      <div class="presets">
+        <button type="button" class="btn ghost" data-preset="low">Low case</button>
+        <button type="button" class="btn ghost" data-preset="high">High case</button>
+      </div>
+    </div>
+    <div class="calc">
+      <div style="display:grid;gap:26px;align-content:start">
+        <div class="knob">
+          <div class="knob-h"><label for="k-heard">Re-introductions actually heard</label><output id="o-heard" for="k-heard"></output></div>
+          <input type="range" id="k-heard" min="10" max="90" step="5" value="70">
+          <span class="hint">Some will be skipped past, or never reached in a session.</span>
+        </div>
+        <div class="knob">
+          <div class="knob-h"><label for="k-lift">Lift among those who hear it</label><output id="o-lift" for="k-lift"></output></div>
+          <input type="range" id="k-lift" min="10" max="150" step="5" value="100">
+          <span class="hint">+100% means the primary metric doubles, from 3.3% to 6.5%.</span>
+        </div>
+      </div>
+      <div class="outs">
+        <div class="fig"><span class="n" id="r-arm">–</span><p>Listeners needed per arm (80% power, listener-clustered)</p></div>
+        <div class="fig"><span class="n" id="r-conn">–</span><p>More listener–artist connections reaching a second song, per month, per 1M listeners like the median one here</p></div>
+      </div>
+    </div>
+    <p class="note">From sizing.py: 1.2 triggers per listener a month, baseline 3.26%, intra-class correlation planned at 0.02. Units, not a forecast: the sample is heavy listeners. The 90-day readout, not traffic, sets the timeline.</p>
+  </div>
+  <div class="tbl rv">
+    <table>
+      <thead><tr><th>Type</th><th>Metric</th></tr></thead>
+      <tbody>
+        <tr><td>Primary</td><td>A different song by the triggered artist, played and not skipped, in days 30–90. The re-introduced song doesn't count.</td></tr>
+        <tr><td>Leading · 30 days</td><td>Something the re-introduction can't produce by itself: a return the listener starts, a save, or a follow</td></tr>
+        <tr><td>Guardrails</td><td>Listening time per session, skip rate on re-introduced tracks, hide rate. Reported separately for loyal listeners.</td></tr>
+        <tr><td>Counter-metric</td><td>The primary metric for other artists in the same surfaces, to catch crowding out</td></tr>
+        <tr><td>Decision rule</td><td>Ship if the primary metric rises and no guardrail breaks. Iterate on timing or song choice if only the leading metric moves. Stop if re-introductions are skipped more than the surface's normal rate.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- B3 -->
+<section class="sec" id="b3" data-track="B3" data-name="Rollout and options">
+  <div class="sec-row"><span>B3</span><span>//Workflow</span><span>Three phases</span></div>
+  <div class="sec-head rv">
+    <h2>Rollout <span class="grad">&amp; options.</span></h2>
+    <p class="lede">Most ideas for helping small artists act on the first listen. <b>The first listen is already fair</b>, so they add introductions to the same leak.</p>
+  </div>
+  <div class="flow rv">
+    <div class="step"><div class="step-h">1. Offline replay</div><ul><li>Trigger volumes on Spotify's own data</li><li>Separate autoplay from own playlists</li><li>Check day 30 predicts day 90</li></ul></div>
+    <div class="step"><div class="step-h">2. A/B test</div><ul><li>Radio and autoplay first</li><li>One month enrolment</li><li>90-day readout</li></ul></div>
+    <div class="step"><div class="step-h">3. Expand</div><ul><li>Mixes next</li><li>Test the v2 reason line</li><li>Test timing: 1, 2 or 4 weeks</li></ul></div>
+  </div>
+  <div class="tbl rv">
+    <table>
+      <thead><tr><th>Option</th><th>Acts on</th><th>Impact</th><th>Decision</th></tr></thead>
+      <tbody>
+        <tr class="pick"><td>A. Re-introduce liked-but-lost artists with a different song</td><td>The gap</td><td>High</td><td>Build and test</td></tr>
+        <tr><td>B. More lesser-known artists in first exposure</td><td>The first listen</td><td>Low</td><td>No: more introductions, same leak</td></tr>
+        <tr><td>C. Hide monthly listener counts</td><td>The first listen</td><td>Low</td><td>No: interviewees already ignore them</td></tr>
+        <tr><td>D. Genre tags on tracks</td><td>The first listen</td><td>Low</td><td>No: 1 of 4 interviewees wanted them</td></tr>
+        <tr><td>E. Album-based mixes instead of artist radio</td><td>Relevance in general</td><td>Medium</td><td>Backlog: not specific to small artists</td></tr>
+        <tr><td>F. "Follow this artist?" prompt after a liked listen</td><td>The gap</td><td>Low</td><td>No: clicks back are rare</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- B4 -->
+<section class="sec" id="b4" data-track="B4" data-name="What I learned">
+  <div class="sec-row"><span>B4</span><span>//Reflection</span><span>Limits</span></div>
+  <div class="two">
+    <div class="rv">
+      <h3>What I learned</h3>
+      <ul>
+        <li><b>The most useful moment was the hypothesis failing.</b> Following the data past the first listen gave a sharper, more buildable problem.</li>
+        <li><b>A pooled number nearly misled me.</b> My first draft headlined "skipped less: 7.9% vs 17.8%". A peer review showed that mostly reflects who listens. Now every comparison is within listeners first.</li>
+        <li><b>Measurement took most of the time.</b> Ranking within genre, checked by hand against Spotify, stopped Burna Boy from counting as "mid".</li>
+        <li><b>Interviews need neutral questions.</b> Where I raised "popularity bias" myself, the answer isn't used as evidence.</li>
+      </ul>
+    </div>
+    <div class="rv">
+      <h3>Limits</h3>
+      <ul>
+        <li>10 friends, mostly heavy listeners in Nigeria and the UK. One has 27% of the plays.</li>
+        <li>"Lean-back" mixes Spotify's surfaces with the listener's own playlists. "Liked" means not skipped.</li>
+        <li>A "first listen" is the first in the export. Big artists may have been heard before.</li>
+        <li>Observational data can't see recommendations shown but not played.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="closer rv">
+  <span class="label">//In one line</span>
+  <h2>Fair first listen.<br>No second one.<br><span class="grad">Build the second.</span></h2>
+  <p>Spotify already sells artists a way to reach listeners who met them passively. Second Listen does it organically, for every lesser-known artist, in the two weeks that matter.</p>
+</div>
+
+<footer>
+  <span>Discovery Gap · a case study by Ena. Independent, not affiliated with or endorsed by Spotify.</span>
+  <span>Listening data from 10 friends' Spotify exports, shared with consent and shown only as random codes (L01–L10). Artist data from Last.fm and Deezer.</span>
+  <span><a href="https://www.figma.com/design/ON8GMBBr827WxdLbSLc0lz/Discovery-Gap--Case-Study">See the designed version in Figma</a></span>
+</footer>
+</div>
+
+<div class="mini" role="region" aria-label="Reading progress">
+  <span class="disc" aria-hidden="true"></span>
+  <div class="ctrls">
+    <button type="button" id="m-prev" aria-label="Previous section"><svg viewBox="0 0 16 16"><path d="M3 2h2v12H3zM14 2.5v11L6 8z"/></svg></button>
+    <button type="button" id="m-next" aria-label="Next section"><svg viewBox="0 0 16 16"><path d="M11 2h2v12h-2zM2 2.5v11L10 8z"/></svg></button>
+  </div>
+  <div class="now">
+    <div class="now-t"><span class="mono" id="m-no">Intro</span><span id="m-name">Discovery Gap</span></div>
+    <div class="pbar"><i id="m-bar"></i></div>
+  </div>
+  <span class="time" id="m-time">0 / 8</span>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script>
+(function () {
+  // Per-listener counts from results/listener_counts.tsv (public, pseudonymised).
+  // [lb_first, lb_first_skipped, lb_disc, lb_stuck] for lesser-known (s) and big (b)
+  const RAW = {
+    L01: { s: [279, 118, 271, 9],     b: [500, 208, 498, 44] },
+    L02: { s: [602, 100, 555, 66],    b: [621, 136, 591, 109] },
+    L03: { s: [1429, 58, 1350, 72],   b: [574, 27, 562, 76] },
+    L04: { s: [441, 204, 426, 35],    b: [325, 111, 322, 81] },
+    L05: { s: [8268, 127, 7904, 1230],b: [1740, 44, 1725, 425] },
+    L06: { s: [167, 17, 123, 17],     b: [219, 36, 180, 26] },
+    L07: { s: [116, 55, 114, 3],      b: [260, 139, 247, 31] },
+    L08: { s: [2744, 341, 2612, 180], b: [1150, 202, 1116, 222] },
+    L09: { s: [139, 56, 125, 6],      b: [264, 100, 225, 15] },
+    L10: { s: [539, 85, 511, 48],     b: [271, 52, 267, 62] }
+  };
+  const people = Object.entries(RAW).map(([id, r]) => ({
+    id, sN: r.s[0], bN: r.b[0],
+    sSkip: 100 * r.s[1] / r.s[0], bSkip: 100 * r.b[1] / r.b[0],
+    sStick: 100 * r.s[3] / r.s[2], bStick: 100 * r.b[3] / r.b[2],
+    sStuck: r.s[3], sDisc: r.s[2], bStuck: r.b[3], bDisc: r.b[2]
+  }));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fmt = (x, d = 1) => x.toFixed(d);
+  const starSvg = '<svg class="star"><use href="#star"/></svg>';
+
+  // ---------- hero title: letters as an equaliser ----------
+  const chars = [];
+  document.querySelectorAll('.hero h1 .w').forEach(w => {
+    w.dataset.w.split('').forEach(c => { const s = document.createElement('span'); s.className = 'ch'; s.textContent = c; s.setAttribute('aria-hidden', 'true'); w.appendChild(s); chars.push(s); });
+  });
+  function eq(level) { chars.forEach((c, i) => c.style.setProperty('--w', level == null ? 125 : Math.round(70 + 80 * Math.abs(Math.sin(i * 1.7 + level))))); }
+  if (!reduce) {
+    let t = 0; const iv = setInterval(() => { eq(t += .6); if (t > 6) { clearInterval(iv); eq(null); } }, 120);
+    const h1 = document.querySelector('.hero h1');
+    h1.addEventListener('pointermove', e => eq(e.clientX / 90));
+    h1.addEventListener('pointerleave', () => eq(null));
+  }
+
+  // ---------- phone waveform ----------
+  const wave = document.getElementById('wave');
+  for (let i = 0; i < 44; i++) {
+    const b = document.createElement('i');
+    const h = .25 + .75 * Math.abs(Math.sin(i * .55) * Math.cos(i * .21));
+    b.style.setProperty('--h', h.toFixed(2)); b.style.setProperty('--d', (.5 + (i % 7) * .09).toFixed(2) + 's');
+    if (i < 10) b.classList.add('past');
+    wave.appendChild(b);
+  }
+
+  // ---------- floating cards: gentle parallax ----------
+  const stage = document.getElementById('stage'), floats = [...stage.querySelectorAll('.float')];
+  if (!reduce) stage.addEventListener('pointermove', e => {
+    if (innerWidth < 900) return;
+    const r = stage.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    floats.forEach(f => { const d = +f.dataset.depth; f.style.transform = `translate(${-x * d}px, ${-y * d}px)`; });
+  });
+
+  // ---------- marquee ribbons ----------
+  document.querySelectorAll('.ribbon .track').forEach(t => {
+    const words = t.dataset.words.split('|');
+    let html = ''; for (let i = 0; i < 8; i++) words.forEach(w => html += `<span>${w}</span>${starSvg}`);
+    t.innerHTML = html + html;
+  });
+
+  // ---------- stat count-up (only when scrolled into view later) ----------
+  const counters = [...document.querySelectorAll('[data-count]')];
+  const startVisible = new Set(counters.filter(c => c.getBoundingClientRect().top < innerHeight));
+  const io1 = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return; io1.unobserve(e.target);
+    const el = e.target, end = +el.dataset.count, dec = +(el.dataset.dec || 0), suf = el.dataset.suf || '', t0 = performance.now();
+    if (reduce || startVisible.has(el)) return;
+    (function tick(now) { const p = Math.min(1, (now - t0) / 1100), v = end * (1 - Math.pow(1 - p, 3)); el.textContent = v.toFixed(dec) + suf; if (p < 1) requestAnimationFrame(tick); })(t0);
+  }), { threshold: .6 });
+  counters.forEach(c => io1.observe(c));
+
+  // ---------- scroll reveal: only for things below the fold, and never hidden ----------
+  const rvs = [...document.querySelectorAll('.rv')];
+  if (!reduce && 'IntersectionObserver' in window) {
+    rvs.forEach(el => { if (el.getBoundingClientRect().top > innerHeight) el.classList.add('pre'); });
+    const io2 = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.remove('pre'); io2.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+    rvs.forEach(el => io2.observe(el));
+  }
+
+  // ---------- svg + tooltip helpers ----------
+  const NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs, parent, text) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; if (parent) parent.appendChild(e); return e; }
+  const tip = document.getElementById('tip');
+  function showTip(html, ev) { tip.innerHTML = html; tip.style.opacity = 1; const x = Math.min(ev.clientX + 14, innerWidth - tip.offsetWidth - 8); tip.style.left = x + 'px'; tip.style.top = (ev.clientY + 14) + 'px'; }
+  function hideTip() { tip.style.opacity = 0; }
+
+  function dumbbell(host, rows, xmax, opts = {}) {
+    host.innerHTML = '';
+    const W = 680, L = 64, R = 74, rowH = opts.rowH || 34, top = 26, H = top + rows.length * rowH + 8;
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': opts.label || '' }, host);
+    const x = v => L + (W - L - R) * v / xmax;
+    const step = xmax <= 30 ? 5 : 10;
+    for (let v = 0; v <= xmax; v += step) {
+      el('line', { x1: x(v), x2: x(v), y1: top - 6, y2: H - 4, stroke: 'rgba(255,255,255,.07)', 'stroke-width': 1 }, svg);
+      el('text', { x: x(v), y: 14, 'text-anchor': 'middle' }, svg, v + '%');
+    }
+    const gs = [];
+    rows.forEach((r, i) => {
+      const y = top + i * rowH + rowH / 2;
+      const g = el('g', { class: 'row' }, svg);
+      el('rect', { class: 'hl', x: 0, y: y - rowH / 2 + 2, width: W, height: rowH - 4, rx: 8 }, g);
+      el('text', { x: 6, y: y + 4, class: 'lbl' }, g, r.id);
+      el('line', { x1: x(Math.min(r.a, r.b)), x2: x(Math.max(r.a, r.b)), y1: y, y2: y, stroke: 'rgba(255,255,255,.22)', 'stroke-width': 2 }, g);
+      el('circle', { cx: x(r.b), cy: y, r: r.rb || 6, fill: css('--big'), stroke: css('--panel'), 'stroke-width': 2, 'fill-opacity': r.rb > 8 ? .85 : 1 }, g);
+      el('circle', { cx: x(r.a), cy: y, r: r.ra || 6, fill: css('--small'), stroke: css('--panel'), 'stroke-width': 2, 'fill-opacity': r.ra > 8 ? .85 : 1 }, g);
+      if (opts.gapLabel) el('text', { x: W - 6, y: y + 4, 'text-anchor': 'end', class: 'val' }, g, (r.b - r.a >= 0 ? '+' : '') + fmt(r.b - r.a) + ' pts');
+      const hit = el('rect', { x: 0, y: y - rowH / 2, width: W, height: rowH, fill: 'transparent' }, g);
+      hit.addEventListener('pointermove', e => { g.classList.add('on'); showTip(r.tip, e); });
+      hit.addEventListener('pointerleave', () => { g.classList.remove('on'); hideTip(); });
+      gs.push(g);
+    });
+    return gs;
+  }
+
+  // ---------- A2: pooled vs within ----------
+  const f1 = document.getElementById('f1-chart'), f1cap = document.getElementById('f1-cap');
+  const sumN = k => people.reduce((a, p) => a + p[k], 0);
+  const pooledS = 100 * Object.values(RAW).reduce((a, r) => a + r.s[1], 0) / sumN('sN');
+  const pooledB = 100 * Object.values(RAW).reduce((a, r) => a + r.b[1], 0) / sumN('bN');
+  let f1mode = 'pooled';
+  function drawF1() {
+    const mode = f1mode;
+    document.getElementById('f1-pooled').setAttribute('aria-pressed', mode === 'pooled');
+    document.getElementById('f1-within').setAttribute('aria-pressed', mode === 'within');
+    document.getElementById('f1-sizekey').hidden = mode !== 'within';
+    if (mode === 'pooled') {
+      dumbbell(f1, [{ id: 'All 10', a: pooledS, b: pooledB, ra: 9, rb: 9,
+        tip: `<b>All plays pooled</b><br>Lesser-known ${fmt(pooledS)}% skipped · big ${fmt(pooledB)}%` }], 60, { rowH: 64, gapLabel: true, label: 'Pooled skip rate' });
+      f1cap.innerHTML = `Pooled, lesser-known artists are skipped <b>${fmt(pooledS)}%</b> of the time against <b>${fmt(pooledB)}%</b> for big ones. That looks like a 10-point advantage. Switch to <b>Each listener</b> to see where it comes from.`;
+    } else {
+      const rad = n => Math.max(4, Math.min(16, 1.6 * Math.sqrt(n / 30)));
+      const rows = people.slice().sort((p, q) => (p.bSkip - p.sSkip) - (q.bSkip - q.sSkip)).map(p => ({
+        id: p.id, a: p.sSkip, b: p.bSkip, ra: rad(p.sN), rb: rad(p.bN),
+        tip: `<b>${p.id}</b><br>Lesser-known: ${fmt(p.sSkip)}% of ${p.sN.toLocaleString()} first listens<br>Big: ${fmt(p.bSkip)}% of ${p.bN.toLocaleString()}`
+      }));
+      dumbbell(f1, rows, 60, { gapLabel: true, label: 'Skip rate by listener' });
+      f1cap.innerHTML = `Within each listener the gap is a median of <b>2 points</b>. 7 listeners lean one way, 3 the other, and it isn't significant (p = 0.34). The big violet dot is <b>L05</b>, a heavy background listener who supplies over half of these first listens and skips only 1.5%. The fair reading is <b>no penalty</b>, not an advantage.`;
+    }
+  }
+  document.getElementById('f1-pooled').onclick = () => { f1mode = 'pooled'; drawF1(); };
+  document.getElementById('f1-within').onclick = () => { f1mode = 'within'; drawF1(); };
+
+  // ---------- A3: stick dumbbell + sonification ----------
+  const f2rows = people.slice().sort((p, q) => (p.bStick - p.sStick) - (q.bStick - q.sStick)).map(p => ({
+    id: p.id, a: p.sStick, b: p.bStick,
+    tip: `<b>${p.id}</b><br>Lesser-known: ${fmt(p.sStick)}% stuck (${p.sStuck} of ${p.sDisc.toLocaleString()})<br>Big: ${fmt(p.bStick)}% (${p.bStuck} of ${p.bDisc.toLocaleString()})`
+  }));
+  let f2groups = [];
+  function drawF2() { f2groups = dumbbell(document.getElementById('f2-chart'), f2rows, 30, { gapLabel: true, label: 'Stick rate by listener' }); }
+
+  let actx = null, playing = false;
+  function note(freq, t, dur, type) {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.18, t + .02); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + .05);
+  }
+  const pitch = p => 196 * Math.pow(2, p / 10);
+  const hearBtn = document.getElementById('hear');
+  function hear() {
+    if (playing) return;
+    try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch (e) { document.getElementById('hear-note').textContent = 'Sound is not available in this browser.'; return; }
+    playing = true; hearBtn.querySelector('span').textContent = 'Playing…';
+    const t0 = actx.currentTime + .1, step = .62;
+    f2rows.forEach((r, i) => {
+      note(pitch(r.a), t0 + i * step, .5, 'triangle');
+      note(pitch(r.b), t0 + i * step + .26, .6, 'sine');
+      setTimeout(() => { f2groups.forEach(g => g.classList.remove('on')); f2groups[i].classList.add('on'); eq(i); }, (i * step + .1) * 1000);
+    });
+    setTimeout(() => { f2groups.forEach(g => g.classList.remove('on')); eq(null); playing = false; hearBtn.querySelector('span').textContent = 'Hear it again'; }, (f2rows.length * step + .7) * 1000);
+  }
+  hearBtn.onclick = hear;
+  document.getElementById('phone-play').onclick = hear;
+
+  // ---------- A4: 1,000-dot fields ----------
+  const FIELDS = {
+    small: { canvas: document.getElementById('fs'), color: '--small', lost: 835, song: 19, count: document.getElementById('c-small'), sub: document.getElementById('s-small') },
+    big:   { canvas: document.getElementById('fb'), color: '--big',   lost: 797, song: 57, count: document.getElementById('c-big'),   sub: document.getElementById('s-big') }
+  };
+  function order(seed) { const a = [...Array(1000).keys()]; let s = seed; for (let i = 999; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor(s / 233280 * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  FIELDS.small.ord = order(7); FIELDS.big.ord = order(11);
+  let stageN = 0;
+  function dotState(f, rank) {
+    if (stageN === 0) return 'on';
+    if (stageN === 1) return rank < f.lost ? 'off' : 'on';
+    return rank < f.song ? 'hit' : 'off';
+  }
+  function drawField(f, prog) {
+    const c = f.canvas, dpr = devicePixelRatio || 1, w = c.clientWidth, h = w * 25 / 40;
+    if (!w) return;
+    if (c.width !== Math.round(w * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+    const ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+    const p = w / 40, col = css(f.color), faint = css('--faint');
+    for (let i = 0; i < 1000; i++) {
+      const rank = f.ord[i], cx = (i % 40 + .5) * p, cy = (Math.floor(i / 40) + .5) * p;
+      const st = dotState(f, rank);
+      const t = Math.min(1, Math.max(0, prog * 1.6 - (rank / 1000) * .6));
+      let r = p * .3, fill = col;
+      if (st === 'off') fill = t > .5 ? faint : col;
+      if (st === 'hit') r = p * (.3 + .14 * t);
+      ctx.fillStyle = fill; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+      if (st === 'hit' && t > .5) { ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, r + 3, 0, Math.PI * 2); ctx.stroke(); }
+    }
+  }
+  const capF = document.getElementById('ff-cap');
+  function setStage(s) {
+    stageN = s;
+    document.querySelectorAll('.stepper button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.stage === s));
+    const S = FIELDS.small, B = FIELDS.big;
+    if (s === 0) {
+      S.count.textContent = B.count.textContent = '1,000';
+      S.sub.textContent = B.sub.textContent = 'Liked first listens: played through, not skipped';
+      capF.innerHTML = 'Both start in the same place: a first listen that played on by itself, and that the listener let play.';
+    } else if (s === 1) {
+      S.count.textContent = S.lost; B.count.textContent = B.lost;
+      S.sub.textContent = '84% not heard again within two weeks'; B.sub.textContent = '80% not heard again within two weeks';
+      capF.innerHTML = 'Most liked artists of any size vanish. <b>The difference is what happens next.</b>';
+    } else {
+      S.count.textContent = S.song; B.count.textContent = B.song;
+      S.sub.textContent = '2.3% of the lost ones get a different song played'; B.sub.textContent = '7.1% of the lost ones get a different song played';
+      capF.innerHTML = 'Among the lost, a different song gets played in days 30–90 for <b>19 lesser-known artists</b> against <b>57 big ones</b>. For big artists, other routes seem to fill in: clicks back, and exposure off the platform.';
+    }
+    const start = performance.now();
+    (function frame(now) { const pr = reduce ? 1 : Math.min(1, (now - start) / 700); drawField(S, pr); drawField(B, pr); if (pr < 1) requestAnimationFrame(frame); })(start);
+  }
+  document.querySelectorAll('.stepper button').forEach(b => b.onclick = () => setStage(+b.dataset.stage));
+
+  // ---------- B1: Second Listen timeline ----------
+  const tl = document.getElementById('tl'), player = document.getElementById('player'), gHead = document.getElementById('g-head');
+  const bars = [...document.querySelectorAll('.g-bar')];
+  const P = { day: document.getElementById('tl-day'), surface: document.getElementById('p-surface'), song: document.getElementById('p-song'), badge: document.getElementById('p-badge'), state: document.getElementById('p-state') };
+  function setDay(d) {
+    P.day.textContent = 'Day ' + d;
+    gHead.style.left = `calc(${(d / 90) * 100}% - 1px)`;
+    bars.forEach(b => b.classList.toggle('on', d >= +b.dataset.from && (d < +b.dataset.to || (d === 90 && +b.dataset.to === 90))));
+    let s;
+    if (d === 0) s = ['Radio · after a song you played', 'Song one', 'Played to the end', false, 'A lean-back first listen of a lesser-known artist. The listener let it play all the way through.'];
+    else if (d < 14) s = ['Nothing from this artist', 'Song one', 'No plays yet', true, `Day ${d}. No play of the artist since. Today, 84% of liked lesser-known artists end up here.`];
+    else if (d === 14) s = ['Trigger', 'Song one', 'Liked, then lost', true, 'Two weeks with no play. The artist is verified, has several released songs, and wasn\'t heard in a sleep or background context.'];
+    else if (d < 30) s = ['Radio · the same surface as before', 'Song two, a different one', 'Second Listen', false, 'One ranking boost, with a different song, where the listener first heard them. One try per artist, at most 2 a week.'];
+    else s = ['Measuring · days 30–90', 'Song three?', 'Primary metric', false, 'Does the listener play another song by this artist, not the re-introduced one? Baseline 3.3%. The experiment has to beat it.'];
+    [P.surface.textContent, P.song.textContent, P.badge.textContent] = s;
+    P.badge.classList.toggle('off', s[3]); player.classList.toggle('dim', s[3]); P.state.textContent = s[4];
+  }
+  tl.addEventListener('input', () => setDay(+tl.value));
+  bars.forEach(b => { b.style.cursor = 'pointer'; b.addEventListener('click', () => { tl.value = Math.min(90, +b.dataset.from + (b.dataset.from === '1' ? 5 : b.dataset.from === '14' ? 2 : 0)); setDay(+tl.value); }); });
+
+  // ---------- B2: calculator (same maths as sizing.py) ----------
+  const BASE = 0.0326, TRIG = 1.224, LISTENERS_PER_REINTRO = 0.385;
+  const kH = document.getElementById('k-heard'), kL = document.getElementById('k-lift');
+  function nPerArm(p1, p2) {
+    const za = 1.959964, zb = 0.841621, pb = (p1 + p2) / 2;
+    const num = za * Math.sqrt(2 * pb * (1 - pb)) + zb * Math.sqrt(p1 * (1 - p1) + p2 * (1 - p2));
+    return Math.ceil(num * num / Math.pow(p2 - p1, 2));
+  }
+  const round = n => n >= 10000 ? Math.round(n / 1000) * 1000 : n >= 1000 ? Math.round(n / 100) * 100 : Math.round(n / 10) * 10;
+  function calc() {
+    const h = kH.value / 100, l = kL.value / 100;
+    document.getElementById('o-heard').textContent = kH.value + '%';
+    document.getElementById('o-lift').textContent = '+' + kL.value + '%';
+    document.getElementById('r-arm').textContent = '~' + round(nPerArm(BASE, BASE * (1 + h * l)) * LISTENERS_PER_REINTRO).toLocaleString();
+    document.getElementById('r-conn').textContent = '~' + round(1e6 * TRIG * h * BASE * l).toLocaleString();
+  }
+  [kH, kL].forEach(k => k.addEventListener('input', calc));
+  document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
+    const low = b.dataset.preset === 'low'; kH.value = low ? 30 : 70; kL.value = low ? 25 : 100; calc();
+  });
+
+  // ---------- mini player: reading progress ----------
+  const secs = [...document.querySelectorAll('section[data-track]')];
+  const mNo = document.getElementById('m-no'), mName = document.getElementById('m-name'), mBar = document.getElementById('m-bar'), mTime = document.getElementById('m-time');
+  function current() { let c = -1; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < innerHeight * .4) c = i; }); return c; }
+  function onScroll() {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    mBar.style.width = (max > 0 ? scrollY / max * 100 : 0) + '%';
+    const c = current();
+    mTime.textContent = (c + 1) + ' / ' + secs.length;
+    if (c < 0) { mNo.textContent = 'Intro'; mName.textContent = 'Discovery Gap'; }
+    else { mNo.textContent = secs[c].dataset.track; mName.textContent = secs[c].dataset.name; }
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  const go = el => el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+  document.getElementById('m-next').onclick = () => go(secs[Math.min(current() + 1, secs.length - 1)]);
+  document.getElementById('m-prev').onclick = () => { const c = current(); c <= 0 ? scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }) : go(secs[c - 1]); };
+
+  // ---------- boot ----------
+  drawF1(); drawF2(); setStage(0); setDay(0); calc(); onScroll();
+  addEventListener('resize', () => { drawField(FIELDS.small, 1); drawField(FIELDS.big, 1); });
+})();
+</script>
+</body>
+</html>
