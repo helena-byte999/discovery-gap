@@ -235,7 +235,7 @@ section.sec { padding-block: 90px 40px; display: grid; gap: 34px; scroll-margin-
 .btn.ghost { background: var(--panel-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-2); padding-left: 16px; }
 .btn svg { width: 15px; height: 15px; fill: currentColor; }
 .chart { width: 100%; overflow-x: auto; }
-.chart svg { display: block; width: 100%; height: auto; min-width: 460px; }
+.chart svg { display: block; width: 100%; height: auto; }
 .chart text { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
 .chart .lbl { fill: var(--ink-2); }
 .chart .val { fill: var(--ink); font-weight: 500; }
@@ -301,10 +301,18 @@ section.sec { padding-block: 90px 40px; display: grid; gap: 34px; scroll-margin-
 .g-bar.hot { background: var(--grad); box-shadow: none; }
 .g-bar.hot span { color: rgba(255,255,255,.75); }
 .g-bar.on { box-shadow: inset 0 0 0 1.5px var(--small); }
+@media (max-width: 640px) {
+  .g-axis, .g-head { display: none; }
+  .g-bar { margin-left: 0 !important; width: 100% !important; min-height: 0; padding: 12px 16px; border-radius: 16px; }
+  .g-bar b { font-size: 16px; }
+  .day { font-size: 30px; }
+}
 .g-head { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--ink); border-radius: 2px; pointer-events: none; transition: left .15s; }
 .g-head::before { content: ""; position: absolute; top: -4px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); }
 .slider { display: grid; gap: 8px; }
-.slider-h { display: flex; justify-content: space-between; align-items: baseline; }
+.slider-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.slider-h .label { min-width: 0; }
+.day { white-space: nowrap; }
 .day { font-family: var(--display); font-size: 40px; font-weight: 800; font-variation-settings: "wdth" 110; line-height: 1; font-variant-numeric: tabular-nums; }
 input[type="range"] { width: 100%; accent-color: var(--small); }
 .rules { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
@@ -610,12 +618,12 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
         <div class="slider-h"><span class="label">Drag through the 90 days</span><span class="day" id="tl-day">Day 0</span></div>
         <input type="range" id="tl" min="0" max="90" value="0" step="1" aria-label="Days since the first listen">
       </div>
-      <div class="g-axis" aria-hidden="true"><span style="left:0">Day 0</span><span style="left:15.56%">14</span><span style="left:33.33%">30</span><span style="left:100%">90</span></div>
+      <div class="g-axis" aria-hidden="true"><span style="left:0">0</span><span style="left:15.56%">14</span><span style="left:33.33%">30</span><span style="left:100%">90</span></div>
       <div class="g-body" id="g-body">
-        <div class="g-bar" data-from="0" data-to="1" style="margin-left:0;width:22%"><b>First listen</b><span>Liked · lean-back</span></div>
-        <div class="g-bar" data-from="1" data-to="14" style="margin-left:1.1%;width:36%"><b>Lost</b><span>No play for 14 days</span></div>
-        <div class="g-bar hot" data-from="14" data-to="30" style="margin-left:15.56%;width:40%"><b>Second Listen</b><span>One boost · a different song</span></div>
-        <div class="g-bar" data-from="30" data-to="90" style="margin-left:33.33%;width:66.67%"><b>Readout</b><span>Does a third song get played?</span></div>
+        <div class="g-bar" data-from="0" data-to="1" style="margin-left:0;width:22%"><b>First listen</b><span>Day 0 · liked, played on by itself</span></div>
+        <div class="g-bar" data-from="1" data-to="14" style="margin-left:1.1%;width:36%"><b>Lost</b><span>Days 1–14 · no play</span></div>
+        <div class="g-bar hot" data-from="14" data-to="30" style="margin-left:15.56%;width:40%"><b>Second Listen</b><span>Days 14–30 · one boost, a different song</span></div>
+        <div class="g-bar" data-from="30" data-to="90" style="margin-left:33.33%;width:66.67%"><b>Readout</b><span>Days 30–90 · does another song get played?</span></div>
         <span class="g-head" id="g-head" style="left:0"></span>
       </div>
     </div>
@@ -848,10 +856,11 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
 
   function dumbbell(host, rows, xmax, opts = {}) {
     host.innerHTML = '';
-    const W = 680, L = 64, R = 74, rowH = opts.rowH || 34, top = 26, H = top + rows.length * rowH + 8;
+    const W = Math.max(300, Math.round(host.clientWidth) || 680), narrow = W < 520;
+    const L = narrow ? 40 : 64, R = narrow ? 66 : 74, rowH = opts.rowH || 34, top = 26, H = top + rows.length * rowH + 8;
     const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': opts.label || '' }, host);
     const x = v => L + (W - L - R) * v / xmax;
-    const step = xmax <= 30 ? 5 : 10;
+    const step = narrow ? (xmax <= 30 ? 10 : 20) : (xmax <= 30 ? 5 : 10);
     for (let v = 0; v <= xmax; v += step) {
       el('line', { x1: x(v), x2: x(v), y1: top - 6, y2: H - 4, stroke: 'rgba(255,255,255,.07)', 'stroke-width': 1 }, svg);
       el('text', { x: x(v), y: 14, 'text-anchor': 'middle' }, svg, v + '%');
@@ -1217,7 +1226,11 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   try { if (location.hash) history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   scrollTo(0, 0);
   drawF1(); drawF2(); setStage(0); setDay(0); calc(); onScroll();
-  addEventListener('resize', () => { drawField(FIELDS.small, 1); drawField(FIELDS.big, 1); });
+  let lastW = innerWidth, rz;
+  addEventListener('resize', () => {
+    drawField(FIELDS.small, 1); drawField(FIELDS.big, 1);
+    clearTimeout(rz); rz = setTimeout(() => { if (Math.abs(innerWidth - lastW) > 20) { lastW = innerWidth; drawF1(); drawF2(); } }, 150);
+  });
 })();
 </script>
 </body>
