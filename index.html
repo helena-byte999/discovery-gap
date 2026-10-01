@@ -91,6 +91,9 @@ p { margin: 0; }
 .screen { position: relative; height: 100%; border-radius: 39px; overflow: hidden; background: linear-gradient(170deg, #2433D8 0%, #1A1B5E 38%, #0A0A12 70%); display: grid; grid-template-rows: auto auto 1fr auto; padding: 16px 20px 22px; gap: 12px; text-align: left; }
 .status { display: flex; justify-content: space-between; font: 600 13px var(--body); color: #fff; padding-inline: 8px; }
 .island { position: absolute; top: 12px; left: 50%; width: 92px; height: 26px; margin-left: -46px; background: #000; border-radius: 20px; }
+.keep { position: absolute; left: 18px; right: 18px; bottom: 20px; z-index: 2; display: block; text-align: center; padding: 14px 12px; border-radius: 16px;
+  background: var(--grad); color: #fff; font: 600 14px/1.3 var(--body); text-decoration: none; box-shadow: 0 12px 30px rgba(0,0,0,.45); animation: rise .35s cubic-bezier(.2,.7,.2,1); }
+@keyframes rise { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
 .screen .bar-t .full { font-size: 12px; color: #fff; text-decoration: none; padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,.14); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); }
 .screen .bar-t { display: flex; justify-content: space-between; align-items: center; color: #fff; font-size: 13.5px; opacity: .9; }
 .vinyl { align-self: center; justify-self: center; width: 200px; height: 200px; border-radius: 50%; position: relative;
@@ -422,6 +425,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
           </div>
           <div class="times"><span id="t-pos">0:00</span><span id="t-dur">Press play</span></div>
           <div class="wave" id="wave" aria-hidden="true"></div>
+          <a class="keep" id="np-keep" href="https://open.spotify.com/track/3USDaKxyFcwD6ehOYowW2j" target="_blank" rel="noopener" hidden>Preview over · Keep listening in Spotify ↗</a>
         </div>
       </div>
     </div>
@@ -1039,6 +1043,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
       c.addListener('playback_update', e => {
         gotUpdate = true; const d = e.data; lastPos = d.position || 0;
         setPlaying(!d.isPaused && !d.isBuffering);
+        if (started && d.isPaused && d.duration && d.position >= d.duration - 1500) showKeep();
         if (d.duration) {
           tPos.textContent = mmss(d.position); tDur.textContent = mmss(d.duration);
           const f = d.position / d.duration; waveBars.forEach((b, i) => b.classList.toggle('past', i / waveBars.length < f));
@@ -1049,6 +1054,13 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
   const api = document.createElement('script'); api.src = 'https://open.spotify.com/embed/iframe-api/v1'; api.async = true;
   api.onerror = fallback; document.body.appendChild(api);
   setTimeout(fallback, 6000);
+  // when the preview ends, offer the full song in the Spotify app
+  const keep = document.getElementById('np-keep'), coarse = matchMedia('(pointer: coarse)').matches;
+  let keepTimer;
+  function showKeep() { keep.href = trackUrl(); keep.hidden = false; }
+  function hideKeep() { keep.hidden = true; clearTimeout(keepTimer); }
+  // phones may not report progress, so they also get a local timer matching the ~30s preview
+  function armKeep() { clearTimeout(keepTimer); if (coarse) keepTimer = setTimeout(showKeep, 31000); }
   function showTrack() {
     const q = QUEUE[qi];
     npT.textContent = q.t; npA.textContent = q.a; npQ.textContent = (qi + 1) + ' of ' + QUEUE.length + ' · ' + q.note;
@@ -1068,7 +1080,8 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     if (step > 0 && started && lastPos < 30000) flashPill('Skipped · under 30s');
     else if (step > 0 && started) flashPill('Next · not a skip after 30s');
     const wasPlaying = playingNow;
-    qi = (qi + step + QUEUE.length) % QUEUE.length; lastPos = 0; showTrack();
+    qi = (qi + step + QUEUE.length) % QUEUE.length; lastPos = 0; hideKeep(); showTrack();
+    if (ctrl && (started || wasPlaying)) armKeep();
     if (ctrl) {
       ctrl.loadUri('spotify:track:' + QUEUE[qi].id);
       if (started || wasPlaying) { ctrl.play(); setTimeout(() => { if (!playingNow) ctrl.play(); }, 900); }
@@ -1081,6 +1094,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
 
   ppBtn.onclick = () => {
     if (!ctrl) { fallback(); listen.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); return; }
+    if (playingNow) clearTimeout(keepTimer); else { hideKeep(); armKeep(); }
     gotUpdate = false; ctrl.togglePlay();
     // some browsers only allow the first play from inside Spotify's own player
     setTimeout(() => { if (!gotUpdate) { listen.classList.add('nudge'); tDur.textContent = 'Tap play below'; setTimeout(() => listen.classList.remove('nudge'), 2500); } }, 1500);
