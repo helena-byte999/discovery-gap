@@ -464,7 +464,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     </div>
 
     <div class="float f-track" data-depth="18"><div class="card chipc"><div class="row"><span class="orb"></span><div><div style="font-size:14.5px">A new artist</div><small>Played to the end, not skipped</small></div></div></div></div>
-    <div class="float f-problem" data-depth="30"><div class="card"><span class="tag">Problem</span><p>A liked first listen of a lesser-known artist usually leads nowhere. 84% aren't heard again within two weeks, and listeners rarely go back on their own.</p></div></div>
+    <div class="float f-problem" data-depth="30"><div class="card"><span class="tag">Problem</span><p>A liked first listen of a lesser-known artist usually leads nowhere. About 8 in 10 aren't heard again within two weeks, and listeners rarely go back on their own.</p></div></div>
     <div class="float f-stick" data-depth="22"><div class="card chipc"><small>Still played 30–90 days later</small><div class="big-n"><span style="color:var(--small)">12%</span> <span style="color:var(--muted);font-size:18px">vs</span> 19%</div><small>Lesser-known vs big artists</small></div></div>
     <div class="float f-solution" data-depth="40"><div class="card"><span class="tag">Solution</span><p><b style="color:#fff">Second Listen.</b> After two quiet weeks, bring the artist back once, with a different song, in the radio or mix where the listener first heard them.</p></div></div>
     <div class="float f-ten" data-depth="14"><div class="card chipc"><div class="big-n">10<span style="color:var(--muted);font-size:18px"> of 10</span></div><small>listeners show the gap · very unlikely to be chance</small></div></div>
@@ -476,7 +476,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
 </header>
 
 <div class="stats">
-  <div class="stat"><span class="n" data-count="1.68" data-dec="2" data-suf="M">1.68M</span><span class="label">Plays analysed</span></div>
+  <div class="stat"><span class="n" data-count="1.44" data-dec="2" data-suf="M">1.44M</span><span class="label">Plays analysed</span></div>
   <div class="stat"><span class="n" data-count="10">10</span><span class="label">Listeners' exports</span></div>
   <div class="stat"><span class="n" data-count="4">4</span><span class="label">Interviews</span></div>
   <div class="stat"><span class="n" data-count="30">30</span><span class="label">Artists checked by hand</span></div>
@@ -765,7 +765,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     <div class="rv">
       <h3>Limits</h3>
       <ul>
-        <li>10 friends, mostly heavy listeners in Nigeria and the UK. One has 27% of the plays.</li>
+        <li>10 friends, mostly heavy listeners in Nigeria and the UK. One has 28% of the plays.</li>
         <li>"Lean-back" can't tell Spotify's radio and autoplay apart from the listener's own playlists. "Liked" means not skipped.</li>
         <li>A "first listen" is the first in the export. Big artists may have been heard before.</li>
         <li><b>Size data undercounts African artists.</b> Checked by hand against Spotify for 30 artists, Last.fm undercounts African artists about 3.5× compared with Western ones. It still ranks them in the right order within a genre, so ranking within genre fixes most of it. But artists with no genre tag (71% of lesser-known first listens that played on by themselves) fall back to one fixed Last.fm cut-off, where some African artists may be called lesser-known when they aren't. Deezer, the second check, rates African genres bigger than Last.fm does, which fits that undercount.</li>
@@ -1279,7 +1279,7 @@ footer { border-top: 1px solid var(--line); padding-block: 30px; display: grid; 
     bars.forEach(b => b.classList.toggle('on', d >= +b.dataset.from && (d < +b.dataset.to || (d === 90 && +b.dataset.to === 90))));
     let s;
     if (d === 0) s = ['Radio · after a song you played', 'Song one', 'Played to the end', false, 'A lean-back first listen of a lesser-known artist. The listener let it play all the way through.'];
-    else if (d < 14) s = ['Nothing from this artist', 'Song one', 'No plays yet', true, `Day ${d}. No play of the artist since. Today, 84% of liked lesser-known artists end up here.`];
+    else if (d < 14) s = ['Nothing from this artist', 'Song one', 'No plays yet', true, `Day ${d}. No play of the artist since. Today, about 8 in 10 liked lesser-known artists end up here.`];
     else if (d === 14) s = ['Trigger', 'Song one', 'Liked, then lost', true, 'Two weeks with no play. The artist is verified, has several released songs, and wasn\'t heard in a sleep or background context.'];
     else if (d < 30) s = ['Radio · the same surface as before', 'Song two, a different one', 'Second Listen', false, 'One ranking boost, with a different song, where the listener first heard them. One try per artist, at most 2 a week.'];
     else s = ['Measuring · days 30–90', 'Song three?', 'Primary metric', false, 'Does the listener play another song by this artist, not the re-introduced one? Baseline 3.3%. The experiment has to beat it.'];
